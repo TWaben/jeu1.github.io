@@ -198,20 +198,20 @@
   <script>
 
     // Détection mobile
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isMobile = /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
 if (isMobile) {
-  // Remplace tout le body par un message spécial
   document.body.innerHTML = `
     <div style="display: flex; justify-content: center; align-items: center; height: 100vh; text-align: center; padding: 20px; font-family: Arial, sans-serif;">
       <div>
         <h2>🥺 Oups !</h2>
-        <p>Ce petit jeu est un cadeau spécial...<br><strong>tu dois l'ouvrir seulement sur ton ordinateur</strong> 💻</p>
+        <p>Hop hop hop, c'est un QR code vraiment spécial...<br><strong>les téléphones ne sont pas acceptés.</strong> 💻</p>
         <p>Essaie d'ouvrir ce lien sur ton PC...</p>
       </div>
     </div>
   `;
 }
+
 
     const elea = document.getElementById("elea");
     const messageBox = document.getElementById("messageBox");
