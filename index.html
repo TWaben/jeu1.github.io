@@ -165,6 +165,32 @@
 
 
   </style>
+
+  <script>
+    // Si mobile, on redirige vers une version simplifiée avec message bloquant
+    if (/Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+      document.documentElement.innerHTML = `
+        <head>
+          <meta charset="UTF-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <title>Accès refusé</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              text-align: center;
+              padding: 50px;
+              background-color: #f8f8f8;
+            }
+          </style>
+        </head>
+        <body>
+          <h2>🥺 Oups !</h2>
+          <p>Ce lien est réservé aux ordinateurs.<br><strong>Les téléphones ne sont pas acceptés !</strong></p>
+          <p>Essaie d’ouvrir ça sur ton PC 💻</p>
+        </body>
+      `;
+    }
+  </script>
 </head>
 <body>
   <div id="gameArea">
@@ -196,22 +222,6 @@
   
   
   <script>
-
-    // Détection mobile
-    const isMobile = /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
-if (isMobile) {
-  document.body.innerHTML = `
-    <div style="display: flex; justify-content: center; align-items: center; height: 100vh; text-align: center; padding: 20px; font-family: Arial, sans-serif;">
-      <div>
-        <h2>🥺 Oups !</h2>
-        <p>Hop hop hop, c'est un QR code vraiment spécial...<br><strong>les téléphones ne sont pas acceptés.</strong> 💻</p>
-        <p>Essaie d'ouvrir ce lien sur ton PC...</p>
-      </div>
-    </div>
-  `;
-}
-
 
     const elea = document.getElementById("elea");
     const messageBox = document.getElementById("messageBox");
