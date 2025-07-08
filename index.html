@@ -1,11 +1,15 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Jeu Eléa</title>
+
   <style>
+    /* Cache tout au chargement */
     body {
+      display: none;
       margin: 0;
       overflow: hidden;
       background-color: white;
@@ -18,131 +22,120 @@
     }
 
     #elea {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 150px;
-  height: 150px;
-  background-image: url('elea.png'); /* Ton image ici */
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: top;
-  transform: translate(-50%, -50%);
-}
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 150px;
+      height: 150px;
+      background-image: url('elea.png');
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: top;
+      transform: translate(-50%, -50%);
+    }
 
-#instructions {
-  position: absolute;
-  top: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: rgba(0, 0, 0, 0.7);
-  color: white;
-  padding: 10px 15px;
-  border-radius: 8px;
-  font-family: Arial, sans-serif;
-  font-size: 14px;
-  line-height: 1.4;
-  z-index: 1000;
-}
+    #instructions {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 10px 15px;
+      border-radius: 8px;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      line-height: 1.4;
+      z-index: 1000;
+    }
 
+    #rightBackground {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 50vw;
+      height: 100vh;
+      background-image: url('champdefleur.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      opacity: 0.6;
+      z-index: -1;
+      pointer-events: none;
+    }
 
+    #leftBackground {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 50vw;
+      height: 100vh;
+      background-image: url('enfer.webp');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      opacity: 0.6;
+      z-index: -1;
+      pointer-events: none;
+    }
 
-#rightBackground {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 50vw;       /* moitié de la largeur */
-  height: 100vh;     /* toute la hauteur */
-  background-image: url('champdefleur.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  opacity: 0.6;
-  z-index: -1;       /* derrière tout le reste */
-  pointer-events: none; /* pour ne pas bloquer les clics ou mouvements */
-}
-#leftBackground {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 50vw;
-  height: 100vh;
-  background-image: url('enfer.webp'); /* change ça juste après */
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  opacity: 0.6;
-  z-index: -1;
-  pointer-events: none;
-}
+    #messageBox {
+      position: absolute;
+      top: 50%;
+      right: 20px;
+      transform: translateY(-50%);
+      background-color: #007BFF;
+      color: white;
+      padding: 20px 30px;
+      border-radius: 20px;
+      font-family: Arial, sans-serif;
+      font-size: 20px;
+      font-weight: bold;
+      box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+      animation: floatyBig 4s ease-in-out infinite;
+    }
 
+    .gift {
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      cursor: pointer;
+      z-index: 10;
+    }
 
+    #gift1 {
+      top: 120px;
+      right: 500px;
+      animation: floatyBig 1.2s ease-in-out infinite;
+    }
 
+    #gift2 {
+      bottom: 100px;
+      right: 100px;
+      animation: floatyBig 1.2s ease-in-out infinite;
+    }
 
-#messageBox {
-  position: absolute;
-  top: 50%;
-  right: 20px;
-  transform: translateY(-50%);
-  background-color: #007BFF;
-  color: white;
-  padding: 20px 30px;
-  border-radius: 20px;
-  font-family: Arial, sans-serif;
-  font-size: 20px;
-  font-weight: bold;
-  box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.2);
-  z-index: 1000;
-  animation: floatyBig 4s ease-in-out infinite;
-}
+    #popup {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.6);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+    }
 
-.gift {
-  position: absolute;
-  width: 60px;
-  height: 60px;
-  cursor: pointer;
-  z-index: 10;
-}
-
-/* Position du premier cadeau */
-#gift1 {
-  top: 120px;
-  right: 500px;
-  animation: floatyBig 1.2s ease-in-out infinite;
-}
-
-/* Position du second cadeau */
-#gift2 {
-  bottom: 100px;
-  right: 100px;
-  animation: floatyBig 1.2s ease-in-out infinite;
-}
-
-#popup {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.6);
-  display: none;
-  justify-content: center;
-  align-items: center;
-  z-index: 10000;
-}
-
-#popupContent {
-  background: white;
-  padding: 30px;
-  border-radius: 15px;
-  font-family: Arial;
-  text-align: center;
-}
-
-
-
-
-
+    #popupContent {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      font-family: Arial;
+      text-align: center;
+    }
 
     #nameTag {
       position: absolute;
@@ -155,62 +148,58 @@
     }
 
     @keyframes floatyBig {
-  0%   { transform: translateY(-50%) translateX(0); }
-  20%  { transform: translateY(-53%) translateX(3px); }
-  40%  { transform: translateY(-47%) translateX(-3px); }
-  60%  { transform: translateY(-52%) translateX(2px); }
-  80%  { transform: translateY(-48%) translateX(-2px); }
-  100% { transform: translateY(-50%) translateX(0); }
-}
-
-
+      0% { transform: translateY(-50%) translateX(0); }
+      20% { transform: translateY(-53%) translateX(3px); }
+      40% { transform: translateY(-47%) translateX(-3px); }
+      60% { transform: translateY(-52%) translateX(2px); }
+      80% { transform: translateY(-48%) translateX(-2px); }
+      100% { transform: translateY(-50%) translateX(0); }
+    }
   </style>
 
+  <noscript>
+    <style>body { display: block; }</style>
+    <h2>⚠️ JavaScript requis</h2>
+    <p>Ce site nécessite JavaScript pour fonctionner.</p>
+  </noscript>
+
   <script>
-    // Si mobile, on redirige vers une version simplifiée avec message bloquant
-    if (/Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-      document.documentElement.innerHTML = `
-        <head>
-          <meta charset="UTF-8" />
-          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-          <title>Accès refusé</title>
-          <style>
-            body {
-              font-family: Arial, sans-serif;
-              text-align: center;
-              padding: 50px;
-              background-color: #f8f8f8;
-            }
-          </style>
-        </head>
-        <body>
+    const isMobile = /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (isMobile) {
+      document.addEventListener('DOMContentLoaded', () => {
+        document.body.innerHTML = `
           <h2>🥺 Oups !</h2>
           <p>Ce lien est réservé aux ordinateurs.<br><strong>Les téléphones ne sont pas acceptés !</strong></p>
           <p>Essaie d’ouvrir ça sur ton PC 💻</p>
-        </body>
-      `;
+        `;
+        document.body.style.display = 'block';
+      });
+    } else {
+      window.addEventListener('DOMContentLoaded', () => {
+        document.body.style.display = 'block';
+      });
     }
   </script>
 </head>
+
 <body>
   <div id="gameArea">
     <div id="elea">
       <div id="nameTag">Eléa</div>
     </div>
   </div>
+
   <div id="instructions">
     ZQSD<br>pour se déplacer
   </div>
+
   <div id="messageBox">Salut 🙂​</div>
+
   <img src="cadeau.png" class="gift" id="gift1" />
-<img src="cadeau2.png" class="gift" id="gift2" />
+  <img src="cadeau2.png" class="gift" id="gift2" />
 
-
-  
- 
   <div id="rightBackground"></div>
   <div id="leftBackground"></div>
-
 
   <div id="popup">
     <div id="popupContent">
@@ -219,103 +208,99 @@
       <button onclick="closePopup()">Fermer</button>
     </div>
   </div>
-  
-  
-  <script>
 
+  <script>
     const elea = document.getElementById("elea");
     const messageBox = document.getElementById("messageBox");
     const gift1 = document.getElementById("gift1");
     const gift2 = document.getElementById("gift2");
     const popup = document.getElementById("popup");
     const popupText = document.getElementById("popupText");
-  
+
     let posX = window.innerWidth / 2;
     let posY = window.innerHeight / 2;
     const speed = 1.5;
-  
+
     const keysPressed = {};
-  
+
     document.addEventListener("keydown", (e) => {
       keysPressed[e.key.toLowerCase()] = true;
     });
-  
+
     document.addEventListener("keyup", (e) => {
       keysPressed[e.key.toLowerCase()] = false;
     });
-  
+
     function updatePosition() {
       if (keysPressed["z"]) posY -= speed;
       if (keysPressed["s"]) posY += speed;
       if (keysPressed["q"]) posX -= speed;
       if (keysPressed["d"]) posX += speed;
-  
+
       elea.style.left = posX + "px";
       elea.style.top = posY + "px";
-  
+
       checkCollision();
       checkGiftCollision();
-  
+
       requestAnimationFrame(updatePosition);
     }
-  
+
     requestAnimationFrame(updatePosition);
-  
+
     function checkCollision() {
       const eleaRect = elea.getBoundingClientRect();
       const boxRect = messageBox.getBoundingClientRect();
-  
+
       const isColliding = !(
         eleaRect.right < boxRect.left ||
         eleaRect.left > boxRect.right ||
         eleaRect.bottom < boxRect.top ||
         eleaRect.top > boxRect.bottom
       );
-  
+
       if (isColliding) {
         window.location.href = "jeu.html";
       }
     }
-  
+
     function checkGiftCollision() {
       const eleaRect = elea.getBoundingClientRect();
       const gifts = [gift1, gift2];
-  
+
       for (const gift of gifts) {
         if (!gift || gift.style.display === "none") continue;
-  
+
         const giftRect = gift.getBoundingClientRect();
-  
+
         const isTouching = !(
           eleaRect.right < giftRect.left ||
           eleaRect.left > giftRect.right ||
           eleaRect.bottom < giftRect.top ||
           eleaRect.top > giftRect.bottom
         );
-  
+
         if (isTouching) {
           if (gift.id === "gift1") {
             popupText.innerHTML = "Tu es la <strong>femme</strong> avec qui je veux faire ma vie";
           } else if (gift.id === "gift2") {
             popupText.innerHTML = "Je suis très <strong>fier</strong> de toi et ça me remplit de joie de voir que tu le découvres petit à petit";
           }
-  
+
           openPopup();
           gift.style.display = "none";
           break;
         }
       }
     }
-  
+
     function openPopup() {
       popup.style.display = "flex";
     }
-  
+
     function closePopup() {
       popup.style.display = "none";
     }
   </script>
-  
-  
 </body>
 </html>
