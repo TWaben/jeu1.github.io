@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Jeu Eléa</title>
 
   <style>
-    /* Cache tout au chargement */
     body {
       display: none;
       margin: 0;
@@ -49,13 +47,11 @@
       z-index: 1000;
     }
 
-    #rightBackground {
+    #rightBackground, #leftBackground {
       position: absolute;
       top: 0;
-      right: 0;
       width: 50vw;
       height: 100vh;
-      background-image: url('champdefleur.png');
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
@@ -64,19 +60,14 @@
       pointer-events: none;
     }
 
+    #rightBackground {
+      right: 0;
+      background-image: url('champdefleur.png');
+    }
+
     #leftBackground {
-      position: absolute;
-      top: 0;
       left: 0;
-      width: 50vw;
-      height: 100vh;
       background-image: url('enfer.webp');
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      opacity: 0.6;
-      z-index: -1;
-      pointer-events: none;
     }
 
     #messageBox {
@@ -115,6 +106,15 @@
       right: 100px;
       animation: floatyBig 1.2s ease-in-out infinite;
     }
+    #tinderFloat {
+  top: 50%;
+  left: 20px;
+  width: 150px;
+  height: auto;
+  z-index: 999;
+  animation: floatyBig 1.8s ease-in-out infinite;
+}
+
 
     #popup {
       position: fixed;
@@ -147,6 +147,16 @@
       font-size: 14px;
     }
 
+    #tinderLogo {
+  position: fixed;
+  top: 50%;
+  left: 20px;
+  width: 150px;
+  height: auto;
+  z-index: 999;
+}
+
+
     @keyframes floatyBig {
       0% { transform: translateY(-50%) translateX(0); }
       20% { transform: translateY(-53%) translateX(3px); }
@@ -168,14 +178,27 @@
     if (isMobile) {
       document.addEventListener('DOMContentLoaded', () => {
         document.body.innerHTML = `
-          <h2>🥺 Oups !</h2>
-          <p>Ce lien est réservé aux ordinateurs.<br><strong>Les téléphones ne sont pas acceptés !</strong></p>
-          <p>Essaie d’ouvrir ça sur ton PC 💻</p>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              text-align: center;
+              padding: 50px;
+              background-color: #f8f8f8;
+            }
+
+            .image-mobile {
+      position: absolute;
+      bottom: 50px;
+      left: 52%;
+      transform: translateX(-50%);
+      height: 60vh; /* ajuste selon ta préférence */
+    }
+          </style>
+          <h2>😡 Hop hop hop !</h2>
+          <p>C'est un QR code vraiment spécial.<br><strong>Les téléphones Apple n'y sont pas acceptés. ✋ </strong></p>
+          <p>Ouvre ce lien sur ton PC 💻</p>
+          <img src="enerve.png" alt="image enervée" class="image-mobile" />
         `;
-        document.body.style.display = 'block';
-      });
-    } else {
-      window.addEventListener('DOMContentLoaded', () => {
         document.body.style.display = 'block';
       });
     }
@@ -189,17 +212,14 @@
     </div>
   </div>
 
-  <div id="instructions">
-    ZQSD<br>pour se déplacer
-  </div>
-
+  <div id="instructions">ZQSD<br>pour se déplacer</div>
   <div id="messageBox">Salut 🙂​</div>
-
   <img src="cadeau.png" class="gift" id="gift1" />
   <img src="cadeau2.png" class="gift" id="gift2" />
-
   <div id="rightBackground"></div>
   <div id="leftBackground"></div>
+  <img src="tinder.png" class="gift" id="tinderFloat">
+
 
   <div id="popup">
     <div id="popupContent">
@@ -210,96 +230,103 @@
   </div>
 
   <script>
-    const elea = document.getElementById("elea");
-    const messageBox = document.getElementById("messageBox");
-    const gift1 = document.getElementById("gift1");
-    const gift2 = document.getElementById("gift2");
-    const popup = document.getElementById("popup");
-    const popupText = document.getElementById("popupText");
+    if (!isMobile) {
+      const elea = document.getElementById("elea");
+      const messageBox = document.getElementById("messageBox");
+      const gift1 = document.getElementById("gift1");
+      const gift2 = document.getElementById("gift2");
+      const popup = document.getElementById("popup");
+      const popupText = document.getElementById("popupText");
+      const tinderLogo = document.getElementById("tinderFloat");
 
-    let posX = window.innerWidth / 2;
-    let posY = window.innerHeight / 2;
-    const speed = 1.5;
 
-    const keysPressed = {};
+      let posX = window.innerWidth / 2;
+      let posY = window.innerHeight / 2;
+      const speed = 1.5;
+      const keysPressed = {};
 
-    document.addEventListener("keydown", (e) => {
-      keysPressed[e.key.toLowerCase()] = true;
-    });
+      document.addEventListener("keydown", (e) => keysPressed[e.key.toLowerCase()] = true);
+      document.addEventListener("keyup", (e) => keysPressed[e.key.toLowerCase()] = false);
 
-    document.addEventListener("keyup", (e) => {
-      keysPressed[e.key.toLowerCase()] = false;
-    });
+      function updatePosition() {
+        if (keysPressed["z"]) posY -= speed;
+        if (keysPressed["s"]) posY += speed;
+        if (keysPressed["q"]) posX -= speed;
+        if (keysPressed["d"]) posX += speed;
 
-    function updatePosition() {
-      if (keysPressed["z"]) posY -= speed;
-      if (keysPressed["s"]) posY += speed;
-      if (keysPressed["q"]) posX -= speed;
-      if (keysPressed["d"]) posX += speed;
+        elea.style.left = posX + "px";
+        elea.style.top = posY + "px";
 
-      elea.style.left = posX + "px";
-      elea.style.top = posY + "px";
-
-      checkCollision();
-      checkGiftCollision();
-
-      requestAnimationFrame(updatePosition);
-    }
-
-    requestAnimationFrame(updatePosition);
-
-    function checkCollision() {
-      const eleaRect = elea.getBoundingClientRect();
-      const boxRect = messageBox.getBoundingClientRect();
-
-      const isColliding = !(
-        eleaRect.right < boxRect.left ||
-        eleaRect.left > boxRect.right ||
-        eleaRect.bottom < boxRect.top ||
-        eleaRect.top > boxRect.bottom
-      );
-
-      if (isColliding) {
-        window.location.href = "jeu.html";
+        checkCollision();
+        checkGiftCollision();
+        checkTinderCollision();
+        requestAnimationFrame(updatePosition);d
       }
-    }
 
-    function checkGiftCollision() {
-      const eleaRect = elea.getBoundingClientRect();
-      const gifts = [gift1, gift2];
+      window.addEventListener("DOMContentLoaded", () => {
+        document.body.style.display = "block";
+        requestAnimationFrame(updatePosition);
+      });
 
-      for (const gift of gifts) {
-        if (!gift || gift.style.display === "none") continue;
-
-        const giftRect = gift.getBoundingClientRect();
-
-        const isTouching = !(
-          eleaRect.right < giftRect.left ||
-          eleaRect.left > giftRect.right ||
-          eleaRect.bottom < giftRect.top ||
-          eleaRect.top > giftRect.bottom
+      function checkCollision() {
+        const eleaRect = elea.getBoundingClientRect();
+        const boxRect = messageBox.getBoundingClientRect();
+        const isColliding = !(
+          eleaRect.right < boxRect.left ||
+          eleaRect.left > boxRect.right ||
+          eleaRect.bottom < boxRect.top ||
+          eleaRect.top > boxRect.bottom
         );
-
-        if (isTouching) {
-          if (gift.id === "gift1") {
-            popupText.innerHTML = "Tu es la <strong>femme</strong> avec qui je veux faire ma vie";
-          } else if (gift.id === "gift2") {
-            popupText.innerHTML = "Je suis très <strong>fier</strong> de toi et ça me remplit de joie de voir que tu le découvres petit à petit";
-          }
-
-          openPopup();
-          gift.style.display = "none";
-          break;
+        if (isColliding) {
+          window.location.href = "jeu/jeu.html";
         }
       }
-    }
 
-    function openPopup() {
-      popup.style.display = "flex";
-    }
+      function checkGiftCollision() {
+        const eleaRect = elea.getBoundingClientRect();
+        const gifts = [gift1, gift2];
+        for (const gift of gifts) {
+          if (!gift || gift.style.display === "none") continue;
+          const giftRect = gift.getBoundingClientRect();
+          const isTouching = !(
+            eleaRect.right < giftRect.left ||
+            eleaRect.left > giftRect.right ||
+            eleaRect.bottom < giftRect.top ||
+            eleaRect.top > giftRect.bottom
+          );
+          if (isTouching) {
+            popupText.innerHTML = gift.id === "gift1"
+              ? "Tu es la <strong>femme</strong> avec qui je veux faire ma vie et un des plus belles choses qui me soit arrivé"
+              : "Je suis très <strong>fier</strong> de toi et ça me remplit de joie de voir que tu découvres petit à petit ton potentiel";
+            openPopup();
+            gift.style.display = "none";
+            break;
+          }
+        }
+      }
 
-    function closePopup() {
-      popup.style.display = "none";
+      function checkTinderCollision() {
+        const eleaRect = elea.getBoundingClientRect();
+        const tinderRect = tinderLogo.getBoundingClientRect();
+        const isTouching = !(
+          eleaRect.right < tinderRect.left ||
+          eleaRect.left > tinderRect.right ||
+          eleaRect.bottom < tinderRect.top ||
+          eleaRect.top > tinderRect.bottom
+  );
+  if (isTouching) {
+    window.location.href = "tinder/tinder.html";
+  }
+}
+
+
+      function openPopup() {
+        popup.style.display = "flex";
+      }
+
+      window.closePopup = function () {
+        popup.style.display = "none";
+      }
     }
   </script>
 </body>
