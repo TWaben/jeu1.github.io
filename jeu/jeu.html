@@ -3,8 +3,477 @@
 <head>
   <meta charset="UTF-8" />
   <title>Mini-jeu</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-image: url("plan.jpeg");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .bat-container {
+      position: absolute;
+      left: 5%;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 200px;
+      height: auto;
+      z-index: 1;
+    }
+
+    .cathe-container {
+      position: absolute;
+      right: 5%;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 200px;
+      height: auto;
+      z-index: 1;
+    }
+
+    #bathenri,
+    #cathe {
+      width: 100%;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.5);
+    }
+
+    #avatar-container {
+      position: absolute;
+      width: 150px;
+      left: 14%;
+      top: 66%;
+      transform: translate(-50%, -50%);
+      z-index: 2;
+    }
+
+    #avatar {
+      width: 100%;
+    }
+
+    .bulle {
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%) translateY(-10px);
+      background-color: white;
+      padding: 10px 15px;
+      border-radius: 20px;
+      max-width: 200px;
+      font-size: 14px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      pointer-events: none;
+      white-space: pre-wrap;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    #bulle {
+      color: deeppink;
+    }
+
+    #bulle2 {
+      color: darkblue;
+    }
+    #bulle3 {
+      color: darkblue;
+    }
+    #bulle4 {
+      color: darkblue;
+    }
+    #bulle5 {
+      color: deeppink;
+}
+    #bulle6 {
+      color: darkblue;
+}
+#bulle7 {
+      color: deeppink;
+}
+#bulle8 {
+      color: deeppink;
+}
+
+
+    .marche-container {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 200px;
+  height: auto;
+  z-index: 1;
+}
+
+#marche {
+  width: 140%;
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.5);
+}
+
+#message-zone {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(230, 23, 23, 0.95);
+  color: #fdfdfd;
+  padding: 10px 20px;
+  border-radius: 15px;
+  font-weight: bold;
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  z-index: 10;
+}
+
+#message-narratif {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(102, 99, 99, 0.95);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 15px;
+  font-weight: bold;
+  font-size: 16px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  z-index: 15;
+  max-width: 80%;
+  text-align: center;
+}
+#message-narratif2 {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(102, 99, 99, 0.95);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 15px;
+  font-weight: bold;
+  font-size: 16px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  z-index: 15;
+  max-width: 80%;
+  text-align: center;
+}
+#fondu-noir {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: black;
+  opacity: 0;
+  z-index: 999;
+  pointer-events: none;
+  transition: opacity 2s ease;
+}
+
+
+@keyframes balancement {
+  0%   { transform: rotate(0deg); }
+  25%  { transform: rotate(30deg); }
+  50%  { transform: rotate(-30deg); }
+  75%  { transform: rotate(30deg); }
+  100% { transform: rotate(0deg); }
+}
+
+#avatar.balancement {
+  animation: balancement 9s ease-in-out 1;
+}
+
+
+  </style>
 </head>
-<body style="background-color: black; color: white; display: flex; justify-content: center; align-items: center; height: 100vh;">
-  <h1>Bienvenue dans le mini-jeu 🎮</h1>
+<body>
+
+  <audio id="audioDalida" src="Dalida.mp3"></audio>
+
+  <div class="bat-container" id="batContainer">
+    <img src="batiment.png" alt="Bâtiment" id="bathenri">
+  </div>
+
+  <div class="cathe-container" id="catheContainer">
+    <img src="cathe.png" alt="Cathédrale" id="cathe">
+  </div>
+  <div class="marche-container" id="marcheContainer">
+  <img src="marche.png" alt="Marché" id="marche">
+  </div>
+
+  <div id="avatar-container">
+    <div class="bulle" id="bulle2">J'adore vraiment ses yeux, son nez et ses sourcils</div>
+    <img src="eleavictor.png" alt="Avatar" id="avatar">
+    <div class="bulle" id="bulle">3 fois avant qu'il arrive... je suis trop stressée...</div>
+    <div class="bulle" id="bulle3">Elle marche vraiment vite celle-là, elle est pressée ou c’est moi qui marche lentement ?</div>
+    <div class="bulle" id="bulle4">Non j'ai vraiment l'impression qu'on échappe à une bombe là</div>
+    <div class="bulle" id="bulle5">Quel clochard c'est fou d'être si lent. Aller, aller</div>
+    <div class="bulle" id="bulle6">On est déjà autant collés après 10 minutes... ça rechauffe du froid... </div>
+    <div class="bulle" id="bulle7">Chroma avec ses bras autour de ma taille... Je me les gèle bordel</div>
+    <div class="bulle" id="bulle8">Aller rentrons, que ce soit bien moi qui initie les choses à venir.</div>
+
+
+
+  </div>
+<div id="message-zone">Nous ne nous sommes pas éloigné aussi loin voyons</div>
+<div id="message-narratif">C'est ici que je me suis rendu compte pour la première fois que ton côté speed allait contrebalancer ma lenteur naturelle, bien que mes pieds eurent du mal à assumer.</div>
+<div id="message-narratif2">
+  C'est aussi dans ce lieu que j'ai pris plaisir à te regarder de derrière, de sentir ton parfum flottant dans l'air derrière tes pas, nos petites approches pour se toucher légèrement du doigt puis se prendre par la main entièrement
+</div>
+<div id="fondu-noir"></div>
+
+
+
+  <script>
+  const avatarContainer   = document.getElementById('avatar-container');
+  const bulle             = document.getElementById('bulle');
+  const bulle2            = document.getElementById('bulle2');
+  const bulle3            = document.getElementById('bulle3');
+  const bulle4            = document.getElementById('bulle4');
+  const bulle5            = document.getElementById('bulle5');
+  const bulle6            = document.getElementById('bulle6');
+  const bulle7            = document.getElementById('bulle7');
+  const bulle8            = document.getElementById('bulle8');
+  const messageZone       = document.getElementById('message-zone');
+  const messageNarratif   = document.getElementById('message-narratif');
+  const messageNarratif2  = document.getElementById('message-narratif2');
+  const audioDalida       = document.getElementById('audioDalida');
+
+  let posX = 11;
+  let posY = 62;
+  const speed = 0.08;
+  const keys = {};
+
+  let hasMoved         = false;
+  let messageTimeout;
+  let bloquerMarche    = false;
+
+  let bulle1Affichee   = false;
+  let bulle2Affichee   = false;
+  let bulle3Affichee   = false;
+  let bulle4Affichee   = false;
+  let bulle5Affichee   = false;
+  let bulle6Affichee   = false;
+  let bulle7Affichee   = false;
+  let bulle7Terminee   = false;
+  let bulle8Affichee   = false;
+
+  let narratif1Fait    = false;
+  let narratif2Fait    = false;
+  let horsLimiteDepuis = null;
+  let redirTimeout     = null;
+  const REDIR_DELAY_MS = 5000;
+
+  function showLimitMessage() {
+    if (!messageZone.style.opacity || messageZone.style.opacity === '0') {
+      messageZone.style.opacity = 1;
+      clearTimeout(messageTimeout);
+      messageTimeout = setTimeout(() => {
+        messageZone.style.opacity = 0;
+      }, 3000);
+    }
+  }
+
+  document.addEventListener('keydown', (e) => {
+    keys[e.key.toLowerCase()] = true;
+
+    if (!hasMoved) {
+      hasMoved = true;
+
+      if (!bulle1Affichee) {
+        bulle1Affichee = true;
+
+        setTimeout(() => {
+          bulle.style.opacity = 1;
+          setTimeout(() => { bulle.style.opacity = 0; }, 3000);
+
+          if (!bulle2Affichee) {
+            setTimeout(() => {
+              bulle2Affichee = true;
+              bulle2.style.opacity = 1;
+              setTimeout(() => { bulle2.style.opacity = 0; }, 3000);
+            }, 4000);
+          }
+
+        }, 1000);
+      }
+    }
+
+    // ✅ Affichage de la bulle 8 une fois le perso se remet à bouger
+    if (bulle7Terminee && !bulle8Affichee && ['z','q','s','d'].includes(e.key.toLowerCase())) {
+      bulle8Affichee = true;
+      bulle8.style.opacity = 1;
+      setTimeout(() => {
+        bulle8.style.opacity = 0;
+      }, 3000);
+    }
+  });
+
+  document.addEventListener('keyup', (e) => {
+    keys[e.key.toLowerCase()] = false;
+  });
+
+  function update() {
+    if (!bloquerMarche) {
+      if (keys['z']) posY -= speed;
+      if (keys['s']) posY += speed;
+      if (keys['q']) posX -= speed;
+      if (keys['d']) posX += speed;
+    }
+
+    avatarContainer.style.left = `${posX}%`;
+    avatarContainer.style.top  = `${posY}%`;
+
+    const horsLimite = (posY < 30 || posY > 70);
+
+    if (horsLimite) {
+      showLimitMessage();
+
+      if (!horsLimiteDepuis) {
+        horsLimiteDepuis = Date.now();
+        redirTimeout = setTimeout(() => {
+          window.location.href = "part/part.html";
+        }, REDIR_DELAY_MS);
+      }
+    } else {
+      horsLimiteDepuis = null;
+      clearTimeout(redirTimeout);
+    }
+
+    // ✅ Collision avec le marché
+    if (!bloquerMarche && !bulle3Affichee && posX > 43 && posX < 55 && posY > 54 && posY < 60) {
+      bloquerMarche = true;
+      bulle3Affichee = true;
+
+      bulle3.style.opacity = 1;
+      // ✅ Lancer la musique ici
+                    if (audioDalida) {
+                      audioDalida.volume = 0.02;
+                      audioDalida.play();
+                    }
+      setTimeout(() => { bulle3.style.opacity = 0; }, 4000);
+
+      setTimeout(() => {
+        narratif1Fait = true;
+        messageNarratif.style.opacity = 1;
+
+        setTimeout(() => {
+          messageNarratif.style.opacity = 0;
+
+          setTimeout(() => {
+            if (!narratif2Fait) {
+              narratif2Fait = true;
+              messageNarratif2.style.opacity = 1;
+
+              setTimeout(() => {
+                messageNarratif2.style.opacity = 0;
+
+                setTimeout(() => {
+                  if (!bulle4Affichee) {
+                    bulle4Affichee = true;
+                    bulle4.style.opacity = 1;
+
+                    setTimeout(() => { bulle4.style.opacity = 0; }, 3000);
+
+                    setTimeout(() => {
+                      if (!bulle5Affichee) {
+                        bulle5Affichee = true;
+                        bulle5.style.opacity = 1;
+                        setTimeout(() => { bulle5.style.opacity = 0; }, 3000);
+                      }
+
+                      bloquerMarche = false;
+
+                    }, 3000);
+                  }
+
+                }, 1000);
+              }, 9000);
+            }
+          }, 2000);
+
+        }, 9000);
+
+      }, 7000);
+    }
+
+    // ✅ Collision avec la cathédrale
+    if (!bulle6Affichee && posX > 80 && posX < 95 && posY > 43 && posY < 60) {
+      bulle6Affichee = true;
+      bloquerMarche = true;
+
+      const avatar = document.getElementById('avatar');
+      avatar.classList.add('balancement');
+
+      bulle6.style.opacity = 1;
+      setTimeout(() => {
+        bulle6.style.opacity = 0;
+
+        setTimeout(() => {
+          if (!bulle7Affichee) {
+            bulle7Affichee = true;
+            bulle7.style.opacity = 1;
+
+            setTimeout(() => {
+              bulle7.style.opacity = 0;
+              avatar.classList.remove('balancement');
+              bloquerMarche = false;
+              bulle7Terminee = true;
+            }, 4000);
+          }
+        }, 1000);
+      }, 4000);
+    }
+
+    // ✅ Collision Henriville → fondu
+    if (bulle8Affichee) {
+      const avatarRect = avatarContainer.getBoundingClientRect();
+      const henrivilleRect = document.getElementById('bathenri').getBoundingClientRect();
+
+      const overlap = !(
+        avatarRect.right < henrivilleRect.left ||
+        avatarRect.left > henrivilleRect.right ||
+        avatarRect.bottom < henrivilleRect.top ||
+        avatarRect.top > henrivilleRect.bottom
+      );
+
+      if (overlap) {
+        const fondu = document.getElementById('fondu-noir');
+        fondu.style.opacity = 1;
+
+        setTimeout(() => {
+          window.location.href = "../jeu2/jeu2.html";
+        }, 2000);
+      }
+    }
+
+    requestAnimationFrame(update);
+  }
+
+  update();
+</script>
+
+
+
+
+
+
+
+
+
+
+
 </body>
 </html>
