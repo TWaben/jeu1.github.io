@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tinder Animation</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    #gameOver {
+      position: fixed;
+      top: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: violet;
+      font-size: 48px;
+      font-weight: bold;
+      font-family: Arial, sans-serif;
+      display: none;
+      z-index: 9999;
+    }
+
+    #retryButton {
+  position: fixed;
+  right: 40px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: #444;
+  color: white;
+  padding: 15px 25px;
+  border-radius: 20px;
+  font-size: 22px;
+  font-family: Arial, sans-serif;
+  display: none;
+  z-index: 9999;
+  animation: floatUpDown 515ms ease-in-out infinite;
+  box-shadow: 2px 2px 10px rgba(0,0,0,0.4);
+}
+
+@keyframes floatUpDown {
+  0% { transform: translateY(-50%) translateY(0); }
+  50% { transform: translateY(-50%) translateY(-10px); }
+  100% { transform: translateY(-50%) translateY(0); }
+}
+
+  </style>
+</head>
+<body>
+  <img id="sequence" src="images/elea1.png" alt="Intro" />
+  <div id="gameOver">Eléa n'est plus amoureuse de Victor malgré les bons souvenirs</div>
+  <a href="../jeu2.html" id="retryButton">Réessaie</a>
+  <audio id="gameOverSound" src="ELEA.mp3"></audio>
+
+  <script>
+    const imageElement = document.getElementById("sequence");
+    const gameOverSound = document.getElementById("gameOverSound");
+
+    const frames = [
+      "images/elea1.png", "images/elea2.png", "images/elea3.png",
+      "images/elea4.png", "images/elea5.png", "images/elea6.png",
+      "images/elea7.png", "images/elea8.png", "images/elea9.png",
+      "images/elea10.png", "images/elea11.png", "images/elea12.png",
+      "images/elea13.png", "images/elea14.png", "images/elea15.png",
+      "images/elea16.png", "images/elea17.png", "images/elea18.png",
+      "images/elea19.png", "images/elea20.png", "images/elea21.png",
+      "images/elea22.png"
+    ];
+
+    let currentFrame = 0;
+
+    // Démarre l'animation après 5 secondes
+    setTimeout(() => {
+
+      // Affiche "GAME OVER" après 2.2 secondes
+      setTimeout(() => {
+        document.getElementById("gameOver").style.display = "block";
+        gameOverSound.play();
+        document.getElementById("retryButton").style.display = "block";
+      }, 3200);
+
+      const interval = setInterval(() => {
+        if (currentFrame >= frames.length) {
+          clearInterval(interval);
+          return;
+        }
+        imageElement.src = frames[currentFrame];
+        currentFrame++;
+      }, 100); // 100 ms = 0.1s par image
+
+    }, 5000); // 5 secondes avant de démarrer la séquence
+  </script>
+</body>
+</html>

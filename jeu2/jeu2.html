@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Jeu 2</title>
+  <style>
+    html {
+      background-color: rgb(208, 206, 241);
+    }
+    body {
+      background-color: rgb(208, 206, 241);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #media-container img,
+    #media-container video {
+      max-width: 90%;
+      height: auto;
+      border-radius: 10px;
+    }
+
+    video {
+      display: block;
+    }
+
+    #avatar-container {
+      display: none;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+    }
+
+    #avatar {
+      width: 150px;
+    }
+
+    #titre-question,
+    #reponse-oui,
+    #reponse-non {
+      font-size: 32px;
+      font-weight: bold;
+      color: rgb(0, 0, 0);
+      opacity: 0;
+      transition: opacity 1s ease;
+      z-index: 20;
+      font-family: sans-serif;
+      position: absolute;
+    }
+
+    #titre-question {
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    #reponse-oui {
+      top: 50%;
+      right: 50px;
+      transform: translateY(-50%);
+    }
+
+    #reponse-non {
+      top: 50%;
+      left: 50px;
+      transform: translateY(-50%);
+    }
+    #fondu-noir {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: black;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 2s ease;
+  z-index: 9999;
+}
+#sol-decor {
+  position: fixed;
+  bottom: -10px;
+  left: 0;
+  width: 100%;
+  height: 110px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+#sol-decor img {
+  height: 110px;
+  flex-shrink: 0;
+}
+
+  </style>
+</head>
+<body>
+
+  <!-- 🎵 Audio -->
+  <audio id="musique" src="sweat.mp3"></audio>
+  <audio id="wow" src="wow.mp3"></audio>
+
+  <!-- 🎬 Zone media -->
+  <div id="media-container"></div>
+
+  <!-- 🫍 Avatar -->
+  <div id="avatar-container">
+    <img src="elea.png" alt="Avatar" id="avatar">
+  </div>
+
+  <!-- Titres -->
+  <div id="titre-question">Eléa est elle toujours amoureuse ?</div>
+  <div id="reponse-oui">Oui</div>
+  <div id="reponse-non">Non</div>
+
+  <div id="fondu-noir"></div>
+  <div id="sol-decor"></div>
+
+
+  <script>
+  const wow = document.getElementById("wow");
+  const sweat = document.getElementById("musique");
+  const container = document.getElementById("media-container");
+  const avatarContainer = document.getElementById("avatar-container");
+  const avatar = document.getElementById("avatar");
+  const titreQuestion = document.getElementById("titre-question");
+  const reponseOui = document.getElementById("reponse-oui");
+  const reponseNon = document.getElementById("reponse-non");
+
+  wow.volume = 1;
+  sweat.volume = 0.5;
+
+  const medias = [
+    { type: 'image', src: 'photo/img1.webp' },
+    { type: 'image', src: 'photo/img3.webp' },
+    { type: 'image', src: 'photo/img2.webp' },
+    { type: 'image', src: 'photo/img20.webp' },
+    { type: 'image', src: 'photo/img21.webp' },
+    { type: 'video', src: 'photo/video1.mp4' },
+    { type: 'image', src: 'photo/img4.webp' },
+    { type: 'image', src: 'photo/img5.webp' },
+    { type: 'image', src: 'photo/img22.webp' },
+    { type: 'image', src: 'photo/img23.webp' },
+    { type: 'image', src: 'photo/img24.webp' },
+    { type: 'image', src: 'photo/img25.webp' },
+    { type: 'image', src: 'photo/img6.webp' },
+    { type: 'image', src: 'photo/img26.webp' },
+    { type: 'image', src: 'photo/img27.webp' },
+    { type: 'image', src: 'photo/img28.webp' },
+    { type: 'image', src: 'photo/img7.webp' },
+    { type: 'image', src: 'photo/img8.webp' },
+    { type: 'image', src: 'photo/img9.webp' },
+    { type: 'image', src: 'photo/img10.webp' },
+    { type: 'image', src: 'photo/img11.webp' },
+    { type: 'image', src: 'photo/img12.webp' },
+    { type: 'image', src: 'photo/img31.webp' },
+    { type: 'image', src: 'photo/img32.webp' },
+    { type: 'image', src: 'photo/img13.webp' },
+    { type: 'image', src: 'photo/img14.webp' },
+    { type: 'image', src: 'photo/img15.webp' },
+    { type: 'image', src: 'photo/img16.webp' },
+    { type: 'image', src: 'photo/img29.webp' },
+    { type: 'image', src: 'photo/img17.webp' },
+    { type: 'image', src: 'photo/img18.webp' },
+    { type: 'image', src: 'photo/img30.webp' },
+    { type: 'image', src: 'photo/img19.webp' },
+    { type: 'image', src: 'photo/img33.webp' },
+    { type: 'image', src: 'photo/img34.webp' },
+    { type: 'image', src: 'photo/img35.webp' },
+    { type: 'image', src: 'photo/img36.webp' },
+    { type: 'image', src: 'photo/img37.webp' },
+    { type: 'image', src: 'photo/img38.webp' },
+    { type: 'image', src: 'photo/img39.webp' },
+    { type: 'image', src: 'photo/img40.webp' },
+    { type: 'image', src: 'photo/img41.webp' },
+    { type: 'image', src: 'photo/img42.webp' },
+    { type: 'image', src: 'photo/img43.webp' },
+    { type: 'image', src: 'photo/img44.webp' },
+    { type: 'image', src: 'photo/img45.webp' },
+    { type: 'image', src: 'photo/img46.webp' },
+    { type: 'image', src: 'photo/img48.webp' },
+    { type: 'image', src: 'photo/img49.webp' },
+    { type: 'image', src: 'photo/img50.webp' },
+    { type: 'image', src: 'photo/img51.webp' },
+    { type: 'image', src: 'photo/img52.webp' },
+    { type: 'image', src: 'photo/img53.webp' },
+    { type: 'image', src: 'photo/img54.webp' },
+    { type: 'image', src: 'photo/img55.webp' },
+    { type: 'video', src: 'photo/video2.mp4' },
+    { type: 'image', src: 'photo/img56.webp' },
+    { type: 'image', src: 'photo/img57.webp' },
+    { type: 'image', src: 'photo/img58.webp' },
+    { type: 'image', src: 'photo/img59.webp' },
+  ];
+
+  let index = 0;
+  let resumeTime = 0;
+
+  function showNextMedia() {
+    container.innerHTML = "";
+    const media = medias[index];
+    if (!media) return;
+
+    if (media.type === 'image') {
+      const img = document.createElement("img");
+      img.src = media.src;
+      container.appendChild(img);
+
+      setTimeout(() => {
+        if (media.src === 'photo/img35.webp') {
+          resumeTime = sweat.currentTime;
+          sweat.pause();
+          container.innerHTML = "";
+          avatarContainer.style.display = "block";
+          initAvatarControls();
+
+          setTimeout(() => {
+            titreQuestion.style.opacity = 1;
+            reponseOui.style.opacity = 1;
+            reponseNon.style.opacity = 1;
+          }, 1000);
+        } else {
+          nextStep();
+        }
+      }, 950);
+
+    } else if (media.type === 'video') {
+      const video = document.createElement("video");
+      video.src = media.src;
+      video.autoplay = true;
+      video.muted = true;
+      video.playsInline = true;
+      video.controls = false;
+
+      const timeoutFallback = setTimeout(() => nextStep(), 5000);
+      video.onplay = () => clearTimeout(timeoutFallback);
+      video.onended = nextStep;
+      video.onerror = nextStep;
+
+      container.appendChild(video);
+    }
+  }
+
+  function nextStep() {
+    index++;
+    if (index < medias.length) {
+      showNextMedia();
+    } else {
+  const fondu = document.getElementById("fondu-noir");
+  setTimeout(() => {
+    fondu.style.opacity = 1;
+    setTimeout(() => {
+      window.location.href = "../jeu3/jeu3.html";
+    }, 3000); // délai pour laisser le fondu apparaître
+  }, 1000); // délai de 1 seconde après img59
+}
+  }
+  window.addEventListener("DOMContentLoaded", () => {
+    wow.play()
+      .then(() => wow.onended = startSequence)
+      .catch(() => startSequence());
+  });
+
+  function startSequence() {
+    document.body.style.display = "flex";
+    sweat.play().catch(() => {});
+    showNextMedia();
+  }
+
+  function initAvatarControls() {
+    let x = window.innerWidth / 2;
+    let y = window.innerHeight / 2;
+    const speed = 5;
+    const keys = { z: false, q: false, s: false, d: false };
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key in keys) keys[e.key] = true;
+    });
+
+    document.addEventListener("keyup", (e) => {
+      if (e.key in keys) keys[e.key] = false;
+    });
+
+    function move() {
+      if (keys.z) y -= speed;
+      if (keys.s) y += speed;
+      if (keys.q) x -= speed;
+      if (keys.d) x += speed;
+
+      avatarContainer.style.left = `${x}px`;
+      avatarContainer.style.top = `${y}px`;
+
+      const avatarBox = avatarContainer.getBoundingClientRect();
+      const ouiBox = reponseOui.getBoundingClientRect();
+      const nonBox = reponseNon.getBoundingClientRect();
+
+      // Collision avec "Oui"
+      if (
+        avatarBox.right > ouiBox.left &&
+        avatarBox.left < ouiBox.right &&
+        avatarBox.bottom > ouiBox.top &&
+        avatarBox.top < ouiBox.bottom
+      ) {
+        titreQuestion.style.opacity = 0;
+        reponseOui.style.opacity = 0;
+        reponseNon.style.opacity = 0;
+        avatarContainer.style.display = "none";
+        container.innerHTML = "";
+        sweat.play().catch(() => {});
+        index = medias.findIndex(m => m.src === 'photo/img36.webp');
+        showNextMedia();
+        return;
+      }
+
+      // Collision avec "Non"
+      if (
+        avatarBox.right > nonBox.left &&
+        avatarBox.left < nonBox.right &&
+        avatarBox.bottom > nonBox.top &&
+        avatarBox.top < nonBox.bottom
+      ) {
+        window.location.href = "part/part.html";
+        return;
+      }
+
+      requestAnimationFrame(move);
+    }
+
+    move();
+  }
+  const solDecor = document.getElementById('sol-decor');
+const tulipe1 = 'tulipe1.png';
+const tulipe2 = 'tulipe2.png';
+
+function remplirSolDecor() {
+  const largeurFenetre = window.innerWidth;
+  const largeurTulipe = 70; // ajustable selon la vraie taille
+  const nbTulipes = Math.ceil(largeurFenetre / largeurTulipe);
+
+  for (let i = 0; i < nbTulipes; i++) {
+    const img = document.createElement('img');
+    
+    // 🟢 tous les 3e éléments : tulipe2, sinon tulipe1
+    if ((i + 1) % 3 === 0) {
+      img.src = tulipe2;
+    } else {
+      img.src = tulipe1;
+    }
+
+    solDecor.appendChild(img);
+  }
+}
+
+window.addEventListener('DOMContentLoaded', remplirSolDecor);
+
+</script>
+
+
+</body>
+</html>
