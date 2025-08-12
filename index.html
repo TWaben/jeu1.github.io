@@ -156,7 +156,6 @@
   z-index: 999;
 }
 
-
     @keyframes floatyBig {
       0% { transform: translateY(-50%) translateX(0); }
       20% { transform: translateY(-53%) translateX(3px); }
@@ -212,7 +211,7 @@
     </div>
   </div>
 
-  <div id="instructions">ZQSD<br>pour se déplacer</div>
+  <div id="instructions">ZQSD<br>pour se déplacer<br><br>Un peu de son requis.</div>
   <div id="messageBox">Salut 🙂​</div>
   <img src="cadeau.png" class="gift" id="gift1" />
   <img src="cadeau2.png" class="gift" id="gift2" />
@@ -260,7 +259,7 @@
         checkCollision();
         checkGiftCollision();
         checkTinderCollision();
-        requestAnimationFrame(updatePosition);d
+        requestAnimationFrame(updatePosition);
       }
 
       window.addEventListener("DOMContentLoaded", () => {
@@ -296,7 +295,7 @@
           );
           if (isTouching) {
             popupText.innerHTML = gift.id === "gift1"
-              ? "Tu es la <strong>femme</strong> avec qui je veux faire ma vie et un des plus belles choses qui me soit arrivé"
+              ? "Tu es la <strong>femme</strong> avec qui je veux faire ma vie et une des plus belles choses qui me soit arrivé"
               : "Je suis très <strong>fier</strong> de toi et ça me remplit de joie de voir que tu découvres petit à petit ton potentiel";
             openPopup();
             gift.style.display = "none";
