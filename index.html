@@ -188,35 +188,42 @@
       // Affiche la page "mobile"
       document.body.innerHTML = `
         <style>
-  html, body { 
-    -webkit-text-size-adjust: 100%; /* empêche iOS d’agrandir/réduire tout seul */
+  html, body {
+    /* empêche Safari/Chrome mobile de rééchelonner */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
-  body { 
-    font-family: Arial, sans-serif; 
-    text-align: center; 
-    padding: 50px; 
-    background: #f8f8f8; 
+  body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    padding: 50px;
+    background: #f8f8f8;
     margin: 0;
-    font-size: clamp(16px, 3.8vw, 20px); /* base lisible et cohérente */
+
+    /* ⚓️ tailles FIXES en px pour même rendu local / en ligne */
+    font-size: 18px;        /* était clamp(16px, 3.8vw, 20px) */
+    line-height: 1.35;
   }
   h2 {
     margin: 0 0 12px;
     font-weight: 700;
-    font-size: clamp(22px, 6vw, 36px);   /* titre responsive */
+    font-size: 32px;        /* était clamp(22px, 6vw, 36px) */
+    line-height: 1.2;
   }
   p {
     margin: 8px auto 10px;
     max-width: 28rem;
     line-height: 1.35;
   }
-  .image-mobile { 
-    position: absolute; 
-    bottom: 50px; 
-    left: 52%; 
-    transform: translateX(-50%); 
-    height: 60vh; 
+  .image-mobile {
+    position: absolute;
+    bottom: 50px;
+    left: 52%;
+    transform: translateX(-50%);
+    height: 60vh;
   }
 </style>
+
 
         <h2>😡 Hop hop hop !</h2>
         <p>C'est un QR code vraiment spécial.<br><strong>Les téléphones Apple n'y sont pas acceptés. ✋</strong></p>
