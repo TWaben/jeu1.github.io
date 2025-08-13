@@ -173,35 +173,34 @@
   </noscript>
 
   <script>
-    const isMobile = /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    if (isMobile) {
-      document.addEventListener('DOMContentLoaded', () => {
-        document.body.innerHTML = `
-          <style>
-            body {
-              font-family: Arial, sans-serif;
-              text-align: center;
-              padding: 50px;
-              background-color: #f8f8f8;
-            }
+  // Détection plus robuste (iPadOS déguisé en "Macintosh", mode "version ordinateur", etc.)
+  const ua = navigator.userAgent || "";
+  const isIpadOSLike = ua.includes("Macintosh") && navigator.maxTouchPoints > 1; // iPadOS
+  const isCoarsePointer = window.matchMedia && matchMedia("(pointer: coarse)").matches;
 
-            .image-mobile {
-      position: absolute;
-      bottom: 50px;
-      left: 52%;
-      transform: translateX(-50%);
-      height: 60vh; /* ajuste selon ta préférence */
-    }
-          </style>
-          <h2>😡 Hop hop hop !</h2>
-          <p>C'est un QR code vraiment spécial.<br><strong>Les téléphones Apple n'y sont pas acceptés. ✋ </strong></p>
-          <p>Ouvre ce lien sur ton PC 💻</p>
-          <img src="enerve.png" alt="image enervée" class="image-mobile" />
-        `;
-        document.body.style.display = 'block';
-      });
-    }
-  </script>
+  const isMobile =
+    /Android|iPhone|iPod|IEMobile|Opera Mini/i.test(ua) ||
+    isIpadOSLike ||
+    isCoarsePointer;
+
+  if (isMobile) {
+    document.addEventListener('DOMContentLoaded', () => {
+      // Affiche la page "mobile"
+      document.body.innerHTML = `
+        <style>
+          body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #f8f8f8; }
+          .image-mobile { position: absolute; bottom: 50px; left: 52%; transform: translateX(-50%); height: 60vh; }
+        </style>
+        <h2>😡 Hop hop hop !</h2>
+        <p>C'est un QR code vraiment spécial.<br><strong>Les téléphones Apple n'y sont pas acceptés. ✋</strong></p>
+        <p>Ouvre ce lien sur ton PC 💻</p>
+        <img src="enerve.png" alt="image enervée" class="image-mobile" />
+      `;
+      document.body.style.display = "block";
+    });
+  }
+</script>
+
 </head>
 
 <body>
