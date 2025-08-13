@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Mini-jeu</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-image: url("plan.png");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .bat-container {
+      position: absolute;
+      left: 5%;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 200px;
+      height: auto;
+      z-index: 1;
+    }
+
+    .cathe-container {
+      position: absolute;
+      right: 5%;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 200px;
+      height: auto;
+      z-index: 1;
+    }
+
+    #bathenri, #cathe {
+      width: 100%;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.5);
+    }
+
+    #avatar-container {
+      position: absolute;
+      width: 150px;
+      left: 14%;
+      top: 66%;
+      transform: translate(-50%, -50%);
+      z-index: 2;
+    }
+
+    #avatar { width: 100%; }
+
+    .bulle {
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%) translateY(-10px);
+      background-color: white;
+      padding: 10px 15px;
+      border-radius: 20px;
+      max-width: 200px;
+      font-size: 14px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      pointer-events: none;
+      white-space: pre-wrap;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    #bulle { color: darkblue; }
+    #bulle2, #bulle3, #bulle5, #bulle7 { color: deeppink; }
+    #bulle4, #bulle6 { color: darkblue; }
+    #bulle8 { color: deeppink; }
+
+    /* Bulles 5-6-7 : largeur fixe comme souhaité */
+    #bulle5, #bulle6, #bulle7 {
+      width: 260px;
+      max-width: none;
+      white-space: normal;
+    }
+
+    .marche-container {
+      position: absolute;
+      left: 31%;
+      top: 46%;
+      transform: translate(-50%, -50%);
+      width: 100px;
+      height: auto;
+      z-index: 1;
+    }
+    #marche {
+      width: 140%;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.5);
+    }
+
+    #message-zone {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba(230, 23, 23, 0.95);
+      color: #fdfdfd;
+      padding: 10px 20px;
+      border-radius: 15px;
+      font-weight: bold;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      z-index: 10;
+    }
+
+    #message-narratif,
+    #message-narratif2,
+    #message-narratif3,
+    #message-narratif4 {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba(102, 99, 99, 0.95);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 15px;
+      font-weight: bold;
+      font-size: 16px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      z-index: 15;
+      max-width: 80%;
+      text-align: center;
+    }
+
+    #fondu-noir {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-color: black;
+      opacity: 0;
+      z-index: 999;
+      pointer-events: none;
+      transition: opacity 2s ease;
+    }
+
+    @keyframes balancement {
+      0% { transform: rotate(0deg); }
+      25% { transform: rotate(15deg); }
+      50% { transform: rotate(-15deg); }
+      75% { transform: rotate(15deg); }
+      100% { transform: rotate(0deg); }
+    }
+    #avatar.balancement { animation: balancement 2s ease-in-out infinite; }
+  </style>
+</head>
+<body>
+
+  <audio id="audioDalida" src="../part/Dalida.mp3"></audio>
+  <audio id="audioVolare" src="Volare.mp3"></audio>
+
+  <div class="bat-container" id="batContainer">
+    <img src="batiment.png" alt="Bâtiment" id="bathenri">
+  </div>
+
+  <div class="cathe-container" id="catheContainer">
+    <img src="tour.png" alt="Cathédrale" id="cathe">
+  </div>
+
+  <div class="marche-container" id="marcheContainer">
+    <img src="voiture.png" alt="Marché" id="marche">
+  </div>
+
+  <div id="avatar-container">
+    <div class="bulle" id="bulle">Et si on partait en Sicille? J'avais dis que si j'arrivais à avoir cette formation... </div>
+    <img src="eleavictor.png" alt="Avatar" id="avatar">
+    <div class="bulle" id="bulle2">OUI ! Je m'occupe de tout, je suis une super femme <br> Une pro de l'organisation !</div>
+    <div class="bulle" id="bulle3">Forcément t'as pas réservé le parking, on va pas pouvoir se garer comme d'habitude !!</div>
+    <div class="bulle" id="bulle4">Tranquille... Il y aura forcément de la place...</div>
+    <div class="bulle" id="bulle5">Tu te rend compte? 35 degré là bas alors qu'ici ça flotte déjà comme une vache qui pisse.</div>
+    <div class="bulle" id="bulle6">Je devrai peut-être retirer ce gros pull une fois arrivé là bas...</div>
+    <div class="bulle" id="bulle7">Oui ça doit sentir là dedans. Mais tu es quand même le seigneur de l'univers maitre de l'espèce humaine à mes yeux.</div>
+  </div>
+
+  <div id="message-zone">Nous ne nous sommes pas éloigné aussi loin voyons</div>
+  <div id="message-narratif">Après moulte révasserie de voyage, il était temps d'en vivre l'expérience. La route pour y arriver été difficile. Au sens propre comme au sens figuré.</div>
+  <div id="message-narratif2">Malgré nos petits différents l'excitation s'emparait de nous à mesure que l'on approchait de l'aéroport, et mon angoisse de l'avion également.</div>
+  <div id="message-narratif3">De ton côté c'était la première fois que tu prenais l'avion, notre premier vrai gros voyage ensemble et ton être s'est un peu plus enraciné dans mon âme peu à peu que l'on approchait de l'aéroport</div>
+  <div id="message-narratif4">Jamais je n'ai eu si hâte de vivre une expérience avec quelqu'un. J'avais hâte de faire toutes les activités que l'on avait prévu et aussi (surtout) de vivre les faibles péripéties, grâce à ton talent d'organisatrice, qui nous attendait.</div>
+
+  <div id="fondu-noir"></div>
+
+  <script>
+    const avatarContainer   = document.getElementById('avatar-container');
+    const bulle             = document.getElementById('bulle');
+    const bulle2            = document.getElementById('bulle2');
+    const bulle3            = document.getElementById('bulle3');
+    const bulle4            = document.getElementById('bulle4');
+    const bulle5            = document.getElementById('bulle5');
+    const bulle6            = document.getElementById('bulle6');
+    const bulle7            = document.getElementById('bulle7');
+    const bulle8            = document.getElementById('bulle8');
+    const messageZone       = document.getElementById('message-zone');
+    const messageNarratif   = document.getElementById('message-narratif');
+    const messageNarratif2  = document.getElementById('message-narratif2');
+    const audioDalida       = document.getElementById('audioDalida');
+    const audioVolare       = document.getElementById('audioVolare');
+
+    let posX = 11;
+    let posY = 62;
+    const speed = 0.08;
+    const keys = {};
+
+    let hasMoved         = false;
+    let messageTimeout;
+    let bloquerMarche    = true;
+
+    let bulle1Affichee   = false;
+    let bulle2Affichee   = false;
+    let bulle3Affichee   = false;
+    let bulle4Affichee   = false;
+    let bulle5Affichee   = false;
+    let bulle6Affichee   = false;
+    let bulle7Affichee   = false;
+    let bulle7Terminee   = false;
+    let bulle8Affichee   = false;
+    let voitureTransformee = false;
+    let narratif1Fait    = false;
+    let narratif2Fait    = false;
+    let horsLimiteDepuis = null;
+    let redirTimeout     = null;
+
+    // Auto-drive
+    let autoDrive = false;
+    let autoDriveRaf = null;
+
+    let aeroportFonduFait = false;   // évite plusieurs déclenchements
+  let retourAvatarFait  = false;   // sera mis à true après la retransformation
+
+
+    const REDIR_DELAY_MS = 5000;
+
+    function showLimitMessage() {
+      if (!messageZone.style.opacity || messageZone.style.opacity === '0') {
+        messageZone.style.opacity = 1;
+        clearTimeout(messageTimeout);
+        messageTimeout = setTimeout(() => {
+          messageZone.style.opacity = 0;
+        }, 3000);
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      keys[e.key.toLowerCase()] = true;
+
+      if (!hasMoved) {
+        hasMoved = true;
+
+        if (!bulle1Affichee) {
+          bulle1Affichee = true;
+
+          setTimeout(() => {
+            bulle.style.opacity = 1;
+            setTimeout(() => { bulle.style.opacity = 0; }, 3000);
+
+            if (!bulle2Affichee) {
+              setTimeout(() => {
+                bulle2Affichee = true;
+                bulle2.style.opacity = 1;
+
+                setTimeout(() => {
+                  bulle2.style.opacity = 0;
+
+                  const avatar = document.getElementById("avatar");
+                  avatar.classList.add("balancement");
+                  setTimeout(() => { avatar.classList.remove("balancement"); }, 9000);
+                  bloquerMarche = false;
+
+                }, 3000);
+              }, 4000);
+            }
+          }, 1000);
+        }
+      }
+
+      if (bulle7Terminee && !bulle8Affichee && ['z','q','s','d'].includes(e.key.toLowerCase())) {
+        bulle8Affichee = true;
+        bulle8.style.opacity = 1;
+        setTimeout(() => { bulle8.style.opacity = 0; }, 3000);
+      }
+    });
+
+    document.addEventListener('keyup', (e) => {
+      keys[e.key.toLowerCase()] = false;
+    });
+
+    function update() {
+      if (!bloquerMarche) {
+        if (keys['z']) posY -= speed;
+        if (keys['s']) posY += speed;
+        if (keys['q']) posX -= speed;
+        if (keys['d']) posX += speed;
+      }
+
+      avatarContainer.style.left = `${posX}%`;
+      avatarContainer.style.top  = `${posY}%`;
+
+      const horsLimite = (posY < 30 || posY > 70);
+      if (horsLimite) {
+        showLimitMessage();
+        if (!horsLimiteDepuis) {
+          horsLimiteDepuis = Date.now();
+          redirTimeout = setTimeout(() => {
+            window.location.href = "part/part.html";
+          }, REDIR_DELAY_MS);
+        }
+      } else {
+        horsLimiteDepuis = null;
+        clearTimeout(redirTimeout);
+      }
+
+      // Collision marché
+      if (!bloquerMarche && !bulle3Affichee && posX > 43 && posX < 55 && posY > 54 && posY < 60) {
+        bloquerMarche = true;
+        bulle3Affichee = true;
+
+        bulle3.style.opacity = 1;
+        if (audioDalida) { audioDalida.volume = 0.02; audioDalida.play(); }
+        setTimeout(() => { bulle3.style.opacity = 0; }, 4000);
+
+        setTimeout(() => {
+          narratif1Fait = true;
+          messageNarratif.style.opacity = 1;
+
+          setTimeout(() => {
+            messageNarratif.style.opacity = 0;
+
+            setTimeout(() => {
+              if (!narratif2Fait) {
+                narratif2Fait = true;
+                messageNarratif2.style.opacity = 1;
+
+                setTimeout(() => {
+                  messageNarratif2.style.opacity = 0;
+
+                  setTimeout(() => {
+                    if (!bulle4Affichee) {
+                      bulle4Affichee = true;
+                      bulle4.style.opacity = 1;
+
+                      setTimeout(() => { bulle4.style.opacity = 0; }, 3000);
+
+                      setTimeout(() => {
+                        if (!bulle5Affichee) {
+                          bulle5Affichee = true;
+                          bulle5.style.opacity = 1;
+                          setTimeout(() => { bulle5.style.opacity = 0; }, 3000);
+                        }
+                        bloquerMarche = false;
+                      }, 3000);
+                    }
+                  }, 1000);
+                }, 9000);
+              }
+            }, 2000);
+          }, 9000);
+        }, 7000);
+      }
+
+      // Collision cathédrale
+      if (!bulle6Affichee && posX > 80 && posX < 95 && posY > 43 && posY < 60) {
+        bulle6Affichee = true;
+        bloquerMarche = true;
+
+        const avatar = document.getElementById('avatar');
+        avatar.classList.add('balancement');
+
+        bulle6.style.opacity = 1;
+        setTimeout(() => {
+          bulle6.style.opacity = 0;
+
+          setTimeout(() => {
+            if (!bulle7Affichee) {
+              bulle7Affichee = true;
+              bulle7.style.opacity = 1;
+
+              setTimeout(() => {
+                bulle7.style.opacity = 0;
+                avatar.classList.remove('balancement');
+                bloquerMarche = false;
+                bulle7Terminee = true;
+              }, 4000);
+            }
+          }, 1000);
+        }, 4000);
+      }
+
+      // Collision Henriville → fondu
+      if (bulle8Affichee) {
+        const avatarRect = avatarContainer.getBoundingClientRect();
+        const henrivilleRect = document.getElementById('bathenri').getBoundingClientRect();
+
+        const overlap = !(
+          avatarRect.right < henrivilleRect.left ||
+          avatarRect.left > henrivilleRect.right ||
+          avatarRect.bottom < henrivilleRect.top ||
+          avatarRect.top > henrivilleRect.bottom
+        );
+
+        if (overlap) {
+          const fondu = document.getElementById('fondu-noir');
+          fondu.style.opacity = 1;
+          setTimeout(() => { window.location.href = "../jeu2/jeu2.html"; }, 2000);
+        }
+      }
+
+      // Collision avec la voiture
+      const voitureElement = document.getElementById("marche");
+      const voitureRect = voitureElement.getBoundingClientRect();
+      const avatarRect = avatarContainer.getBoundingClientRect();
+
+      if (
+        !window.voitureTransformee &&
+        !(
+          avatarRect.right < voitureRect.left ||
+          avatarRect.left  > voitureRect.right ||
+          avatarRect.bottom < voitureRect.top ||
+          avatarRect.top > voitureRect.bottom
+        )
+      ) {
+        window.voitureTransformee = true;
+
+        // Remplacer par l'avatar voiture
+        const newAvatar = document.createElement("img");
+        newAvatar.src = "eleavictorvoiture.png";
+        newAvatar.id = "avatar";
+        newAvatar.classList.add("balancement");
+
+        const avatarContainerEl = document.getElementById("avatar-container");
+        const oldAvatar = document.getElementById("avatar");
+        avatarContainerEl.replaceChild(newAvatar, oldAvatar);
+
+        voitureElement.style.display = "none";
+        audioVolare.volume = 0.05;
+        audioVolare.play();
+
+        // Position départ route
+        posX = 29;
+        posY = 46;
+        avatarContainer.style.left = `${posX}%`;
+        avatarContainer.style.top  = `${posY}%`;
+
+        bloquerMarche = true;
+
+        // --- Auto-drive ---
+        avancerVoiture();
+
+        // --- Séquence narrative pendant l'auto-drive ---
+        setTimeout(() => {
+          // Message 1
+          messageNarratif.style.opacity = 1;
+
+          setTimeout(() => {
+            messageNarratif.style.opacity = 0;
+
+            // Bulle 3
+            bulle3.style.opacity = 1;
+            setTimeout(() => {
+              bulle3.style.opacity = 0;
+
+              // Bulle 4
+              bulle4.style.opacity = 1;
+              setTimeout(() => { bulle4.style.opacity = 0; }, 3000);
+
+              // Message 2
+              setTimeout(() => {
+                messageNarratif2.style.opacity = 1;
+
+                setTimeout(() => {
+                  messageNarratif2.style.opacity = 0;
+
+                  // Message 3
+                  setTimeout(() => {
+                    const messageNarratif3 = document.getElementById("message-narratif3");
+                    messageNarratif3.style.opacity = 1;
+
+                    setTimeout(() => {
+                      messageNarratif3.style.opacity = 0;
+
+                      // Bulle 5 (5.5s)
+                      setTimeout(() => {
+                        if (!bulle5Affichee) {
+                          bulle5Affichee = true;
+                          bulle5.style.opacity = 1;
+
+                          setTimeout(() => {
+                            bulle5.style.opacity = 0;
+
+                            // Bulle 6 (4.5s)
+                            setTimeout(() => {
+                              if (!bulle6Affichee) {
+                                bulle6Affichee = true;
+                                bulle6.style.opacity = 1;
+
+                                setTimeout(() => {
+                                  bulle6.style.opacity = 0;
+
+                                  // Bulle 7 (5.5s)
+                                  setTimeout(() => {
+                                    if (!bulle7Affichee) {
+                                      bulle7Affichee = true;
+                                      bulle7.style.opacity = 1;
+
+                                      setTimeout(() => {
+                                        bulle7.style.opacity = 0;
+                                        bulle7Terminee = true;
+
+                                        // Message 4 puis retour à l'avatar normal
+                                        setTimeout(() => {
+                                          const messageNarratif4 = document.getElementById("message-narratif4");
+                                          if (messageNarratif4) {
+                                            messageNarratif4.style.opacity = 1;
+
+                                            setTimeout(() => {
+                                              // Fin message 4
+                                              messageNarratif4.style.opacity = 0;
+
+                                              // Stop auto-drive + restitue contrôles
+                                              autoDrive = false;
+                                              if (autoDriveRaf) cancelAnimationFrame(autoDriveRaf);
+                                              bloquerMarche = false;
+
+                                              // Revenir à l'avatar initial (même position)
+                                              const avatarContainerEl2 = document.getElementById("avatar-container");
+                                              const currentAvatar2 = document.getElementById("avatar");
+                                              const newAvatar2 = document.createElement("img");
+                                              newAvatar2.src = "eleavictor.png";
+                                              newAvatar2.id = "avatar";
+                                              newAvatar2.style.width = "100%";
+                                              avatarContainerEl2.replaceChild(newAvatar2, currentAvatar2);
+
+                                              avatarContainer.style.left = `${posX}%`;
+                                              avatarContainer.style.top  = `${posY}%`;
+                                              retourAvatarFait = true; // ✅ on pourra déclencher le fondu aéroport ensuite
+
+                                            }, 10000); // durée message 4
+                                          }
+                                        }, 1500); // délai après bulle 7
+
+                                      }, 5500);
+                                    }
+                                  }, 1000);
+
+                                }, 4500);
+                              }
+                            }, 1000);
+
+                          }, 5500);
+                        }
+                      }, 1200);
+
+                    }, 8000); // durée message 3
+                  }, 2000);   // délai après message 2
+
+                }, 6000); // durée message 2
+              }, 4000);   // délai après bulle 4
+
+            }, 4000); // durée bulle 3
+          }, 6500);   // durée message 1
+        }, 1000);     // délai après transformation
+      }
+
+      // ✅ Arrivée à l'aéroport (tour.png) -> fondu 3s puis redirect
+      if (retourAvatarFait && !aeroportFonduFait) {
+        const avatarRect2 = avatarContainer.getBoundingClientRect();
+        const aeroportRect = document.getElementById('cathe').getBoundingClientRect();
+
+        const toucheAeroport = !(
+          avatarRect2.right  < aeroportRect.left ||
+          avatarRect2.left   > aeroportRect.right ||
+          avatarRect2.bottom < aeroportRect.top ||
+          avatarRect2.top    > aeroportRect.bottom
+        );
+
+        if (toucheAeroport) {
+          aeroportFonduFait = true;
+
+          const fondu = document.getElementById('fondu-noir');
+          fondu.style.transition = 'opacity 3s ease'; // 3 secondes
+          fondu.style.opacity = 1;
+
+          setTimeout(() => {
+            window.location.href = "../jeu4/jeu4.html";
+          }, 3000);
+        }
+      }
+
+      requestAnimationFrame(update);
+    }
+
+    update();
+
+       // --- Auto-drive helper ---
+    function avancerVoiture() {
+      autoDrive = true;
+      const vitesseVoiture = 0.005;
+      function bouger() {
+        if (!autoDrive) return;
+        posX += vitesseVoiture;
+        avatarContainer.style.left = `${posX}%`;
+        if (posX < 100) {
+          autoDriveRaf = requestAnimationFrame(bouger);
+        } else {
+          autoDrive = false;
+          window.location.href = "../jeu4/jeu4.html";
+        }
+      }
+      autoDriveRaf = requestAnimationFrame(bouger);
+    }
+  </script>
+
+</body>
+</html>
+
