@@ -2,10 +2,17 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="viewport"
+      content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, viewport-fit=cover">
+
   <title>Jeu Eléa</title>
 
   <style>
+
+    html, body { 
+  -webkit-text-size-adjust: none !important;
+  text-size-adjust: none !important;
+}
     body {
       display: none;
       margin: 0;
@@ -155,8 +162,6 @@
   height: auto;
   z-index: 999;
 }
-/* neutralise l’auto-rééchelonnage partout, de manière fiable */
-  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 
   /* Styles quand on est en mode mobile */
   body.mobile {
