@@ -155,6 +155,38 @@
   height: auto;
   z-index: 999;
 }
+/* neutralise l’auto-rééchelonnage partout, de manière fiable */
+  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+
+  /* Styles quand on est en mode mobile */
+  body.mobile {
+    display: block;              /* remet l’affichage (ton body est display:none par défaut) */
+    font-family: Arial, sans-serif;
+    text-align: center;
+    padding: 50px;
+    background: #f8f8f8;
+    margin: 0;
+    font-size: 18px;             /* tailles FIXES = rendu identique local/en ligne */
+    line-height: 1.35;
+  }
+  body.mobile h2 {
+    margin: 0 0 12px;
+    font-weight: 700;
+    font-size: 32px;
+    line-height: 1.2;
+  }
+  body.mobile p {
+    margin: 8px auto 10px;
+    max-width: 28rem;
+    line-height: 1.35;
+  }
+  body.mobile .image-mobile {
+    position: absolute;
+    bottom: 50px;
+    left: 52%;
+    transform: translateX(-50%);
+    height: 60vh;
+  }
 
     @keyframes floatyBig {
       0% { transform: translateY(-50%) translateX(0); }
@@ -173,11 +205,10 @@
   </noscript>
 
   <script>
-  // Détection plus robuste (iPadOS déguisé en "Macintosh", mode "version ordinateur", etc.)
+  // Détection (tu as déjà ce code ; je garde ta logique)
   const ua = navigator.userAgent || "";
-  const isIpadOSLike = ua.includes("Macintosh") && navigator.maxTouchPoints > 1; // iPadOS
+  const isIpadOSLike = ua.includes("Macintosh") && navigator.maxTouchPoints > 1;
   const isCoarsePointer = window.matchMedia && matchMedia("(pointer: coarse)").matches;
-
   const isMobile =
     /Android|iPhone|iPod|IEMobile|Opera Mini/i.test(ua) ||
     isIpadOSLike ||
@@ -185,55 +216,17 @@
 
   if (isMobile) {
     document.addEventListener('DOMContentLoaded', () => {
-      // Affiche la page "mobile"
+      document.body.classList.add('mobile');   // ✅ active les styles du <head>
       document.body.innerHTML = `
-        <style>
-  html, body {
-    /* empêche Safari/Chrome mobile de rééchelonner */
-    -webkit-text-size-adjust: 100%;
-    text-size-adjust: 100%;
-  }
-  body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    padding: 50px;
-    background: #f8f8f8;
-    margin: 0;
-
-    /* ⚓️ tailles FIXES en px pour même rendu local / en ligne */
-    font-size: 18px;        /* était clamp(16px, 3.8vw, 20px) */
-    line-height: 1.35;
-  }
-  h2 {
-    margin: 0 0 12px;
-    font-weight: 700;
-    font-size: 32px;        /* était clamp(22px, 6vw, 36px) */
-    line-height: 1.2;
-  }
-  p {
-    margin: 8px auto 10px;
-    max-width: 28rem;
-    line-height: 1.35;
-  }
-  .image-mobile {
-    position: absolute;
-    bottom: 50px;
-    left: 52%;
-    transform: translateX(-50%);
-    height: 60vh;
-  }
-</style>
-
-
         <h2>😡 Hop hop hop !</h2>
         <p>C'est un QR code vraiment spécial.<br><strong>Les téléphones Apple n'y sont pas acceptés. ✋</strong></p>
         <p>Ouvre ce lien sur ton PC 💻</p>
         <img src="enerve.png" alt="image enervée" class="image-mobile" />
       `;
-      document.body.style.display = "block";
     });
   }
 </script>
+
 
 </head>
 
