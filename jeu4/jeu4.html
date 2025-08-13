@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Jeu 2</title>
+  <style>
+    html { background-color: rgb(245, 224, 167); }
+    body {
+      background-color: rgb(245, 224, 167);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      height: 100vh; margin: 0; overflow: hidden; position: relative;
+    }
+    #media-container img, #media-container video { max-width: 90%; height: auto; border-radius: 10px; }
+    video { display: block; }
+    #avatar-container {
+      position: fixed; left: 50%; bottom: 40px; transform: translateX(-50%);
+      display: none; z-index: 10; pointer-events: none;
+    }
+    #avatar { width: 100px; }
+
+    #titre-question {
+      position: fixed; top: 30px; left: 50%; transform: translateX(-50%);
+      font-size: 20px; font-weight: bold; opacity: 0; transition: opacity .4s;
+    }
+    #reponses {
+      position: fixed; top: 70px; left: 50%; transform: translateX(-50%);
+      display: flex; gap: 16px;
+    }
+    .btn {
+      padding: 8px 12px; border-radius: 8px; border: 1px solid #333; background: #fff; cursor: pointer; opacity: 0; transition: opacity .4s;
+    }
+
+    #fondu-noir {
+      position: fixed; inset: 0; background: #000; opacity: 0; transition: opacity 1s; pointer-events: none; z-index: 9999;
+    }
+
+    /* décor au sol */
+    #sol-decor {
+      position: fixed; bottom: -20px; left: 0; width: 100%; height: 200px;
+      display: flex; justify-content: center; align-items: flex-end; gap: 0;
+      z-index: 1; pointer-events: none; overflow: hidden;
+    }
+    #sol-decor img { height: 200px; flex-shrink: 0; }
+
+    /* barre de progression */
+    #progress-bar-container {
+      position: fixed; top: 32px; left: 50%; transform: translateX(-50%);
+      width: 300px; height: 20px; background-color: rgba(255,255,255,0.3);
+      border: 2px solid #000; border-radius: 10px; overflow: hidden; z-index: 9999;
+    }
+    #progress-bar-fill { height: 100%; width: 0%; background-color: blue; transition: width 0.1s linear; }
+    #progress-bar-title {
+      position: fixed; top: 6px; left: 50%; transform: translateX(-50%);
+      font-size: 22px; font-weight: 700; color: #fff; z-index: 10000; pointer-events: none;
+    }
+
+    .car {
+      position: fixed; top: -140px; width: 140px; z-index: 9; pointer-events: none;
+    }
+
+    .bulle {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-10px);
+  background-color: white;
+  padding: 10px 15px;
+  border-radius: 20px;
+  max-width: 200px;
+  font-size: 14px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+  white-space: pre-wrap;
+  text-align: center;
+  font-weight: bold;
+}
+
+#bulle10 { color: deeppink; }
+#bulle25 { color: darkblue; }
+#bulle40 { color: deeppink; }
+
+  </style>
+</head>
+<body>
+
+  <div id="avatar-container">
+  <img id="avatar" src="avatar1.png" alt="avatar">
+  <div class="bulle" id="bulle10">ON VA TROP VITE RALENTI VICTOR</div>
+  <div class="bulle" id="bulle25">MAIS IL ACCELERE TROP VITE C'EST TROP BIEN</div>
+  <div class="bulle" id="bulle40">J'TE JURE QUE SI TU RALENTI PAS JE FINI A PIED</div>
+</div>
+
+
+  <!-- 🎵 Audio -->
+  <audio id="musique" src="pedro.mp3"></audio>
+  <audio id="wow" src="wow.mp3"></audio>
+  <audio id="musique-minijeu" src="trafic.mp3" loop></audio>
+  <audio id="coeur" src="coeur.wav" loop></audio>
+
+
+
+  <!-- 🎬 Zone media -->
+  <div id="media-container"></div>
+
+  <!-- 🧍 Avatar & UI -->
+  <div id="avatar-container"><img id="avatar" src="avatar1.png" alt="avatar"></div>
+  <div id="titre-question">Tu te souviens d’où on va ?</div>
+  <div id="reponses">
+    <button class="btn" id="reponse-oui">Oui</button>
+    <button class="btn" id="reponse-non">Non</button>
+  </div>
+
+  <!-- 🌷 Décor -->
+  <div id="sol-decor"></div>
+
+  <!-- 🎬 Fondu -->
+  <div id="fondu-noir"></div>
+
+  <script>
+  // --- outils collisions
+  function rectsOverlap(a, b) {
+    return !(
+      a.right < b.left ||
+      a.left > b.right ||
+      a.bottom < b.top ||
+      a.top > b.bottom
+    );
+  }
+
+  
+  // --- trafic voitures
+  const musiqueMiniJeu = document.getElementById("musique-minijeu");
+  musiqueMiniJeu.volume = 0.5; // Ajuste si besoin
+  const coeur = document.getElementById("coeur");
+  coeur.volume = 1; // Ajuste l'intensité du battement si besoin
+
+  
+
+  let trafficTimer = null;
+  function randomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+  function spawnCar() {
+    const car = document.createElement("img");
+    car.className = "car";
+    const cars = ["voiture1.png", "voiture2.png", "voiture3.png"];
+    car.src = cars[randomInt(0, cars.length - 1)];
+    car.style.left = randomInt(50, window.innerWidth - 150) + "px";
+    car.style.top = "-120px";
+    document.body.appendChild(car);
+
+    const speed = 1.5 + Math.random() * 1;
+    function fall() {
+      if (!gameActive) { car.remove(); return; } // 🛑 Arrêt immédiat si le jeu n'est plus actif
+      const top = parseFloat(car.style.top);
+      car.style.top = top + speed + "px";
+
+
+      const avatarBox = document.getElementById("avatar-container").getBoundingClientRect();
+      const carBox = car.getBoundingClientRect();
+
+      if (rectsOverlap(avatarBox, carBox)) {
+        stopTraffic();
+        // avant de rediriger en cas de collision
+localStorage.setItem('pedroTime', String(pedro.currentTime));
+localStorage.setItem('pedroWasPlaying', String(!pedro.paused));
+window.location.href = "part/part3.html";
+
+        return;
+      }
+      if (top > window.innerHeight + 150) { car.remove(); return; }
+      requestAnimationFrame(fall);
+    }
+    requestAnimationFrame(fall);
+  }
+
+  function startTraffic() {
+    stopTraffic();
+    trafficTimer = setInterval(spawnCar, 900);
+  }
+  function stopTraffic() {
+    if (trafficTimer) { clearInterval(trafficTimer); trafficTimer = null; }
+    document.querySelectorAll(".car").forEach((c) => c.remove());
+  }
+
+  const wow = document.getElementById("wow");
+  const pedro = document.getElementById("musique");
+  const container = document.getElementById("media-container");
+  const avatarContainer = document.getElementById("avatar-container");
+  const avatar = document.getElementById("avatar");
+  const titreQuestion = document.getElementById("titre-question");
+  const reponseOui = document.getElementById("reponse-oui");
+  const reponseNon = document.getElementById("reponse-non");
+
+  wow.volume = 1;
+  pedro.volume = 0.5;
+
+  // Flag d'état du mini-jeu
+  let gameActive = false;
+
+  const medias = [
+    { type: 'image', src: 'photo/img1.webp' },
+    { type: 'image', src: 'photo/img2.webp' },
+    { type: 'image', src: 'photo/img3.webp' },
+    { type: 'image', src: 'photo/img4.webp' },
+    { type: 'image', src: 'photo/img5.webp' },
+    { type: 'image', src: 'photo/img6.webp' },
+    { type: 'image', src: 'photo/img7.webp' },
+    { type: 'image', src: 'photo/img8.webp' },
+    { type: 'image', src: 'photo/img9.webp' },
+    { type: 'image', src: 'photo/img10.webp' },
+    { type: 'image', src: 'photo/img11.webp' },
+    { type: 'image', src: 'photo/img12.webp' },
+    { type: 'image', src: 'photo/img13.webp' },
+    { type: 'image', src: 'photo/img14.webp' },
+    { type: 'image', src: 'photo/img15.webp' },
+    { type: 'image', src: 'photo/img16.webp' },
+    { type: 'image', src: 'photo/img17.webp' },
+    { type: 'image', src: 'photo/img18.webp' },
+    { type: 'image', src: 'photo/img19.webp' },
+    { type: 'image', src: 'photo/img20.webp' },
+    { type: 'video', src: 'photo/video1.mp4' },
+    { type: 'image', src: 'photo/img21.webp' },
+    { type: 'image', src: 'photo/img22.webp' },
+    { type: 'image', src: 'photo/img23.webp' },
+    { type: 'image', src: 'photo/img24.webp' },
+    { type: 'image', src: 'photo/img25.webp' },
+    { type: 'image', src: 'photo/img26.webp' },
+    { type: 'image', src: 'photo/img27.webp' },
+    { type: 'image', src: 'photo/img28.webp' },
+    { type: 'image', src: 'photo/img29.webp' },
+    { type: 'image', src: 'photo/img30.webp' },
+    { type: 'image', src: 'photo/img31.webp' },
+    { type: 'image', src: 'photo/img32.webp' },
+    { type: 'image', src: 'photo/img33.webp' },
+    { type: 'image', src: 'photo/img34.webp' },
+    { type: 'image', src: 'photo/img35.webp' },
+    { type: 'image', src: 'photo/img36.webp' },
+    { type: 'image', src: 'photo/img37.webp' },
+    { type: 'image', src: 'photo/img38.webp' },
+    { type: 'image', src: 'photo/img39.webp' },
+    { type: 'image', src: 'photo/img40.webp' },
+    { type: 'image', src: 'photo/img41.webp' },
+    { type: 'image', src: 'photo/img42.webp' },
+    { type: 'image', src: 'photo/img43.webp' },
+    { type: 'image', src: 'photo/img44.webp' },
+    { type: 'image', src: 'photo/img45.webp' },
+    { type: 'image', src: 'photo/img46.webp' },
+    { type: 'image', src: 'photo/img47.webp' },
+    { type: 'image', src: 'photo/img48.webp' },
+    { type: 'image', src: 'photo/img49.webp' },
+    { type: 'image', src: 'photo/img50.webp' },
+    { type: 'image', src: 'photo/img51.webp' },
+    { type: 'image', src: 'photo/img52.webp' },
+    { type: 'image', src: 'photo/img53.webp' },
+    { type: 'image', src: 'photo/img54.webp' },
+    { type: 'image', src: 'photo/img55.webp' },
+    { type: 'image', src: 'photo/img56.webp' },
+    { type: 'image', src: 'photo/img57.webp' },
+    { type: 'image', src: 'photo/img58.webp' },
+    { type: 'image', src: 'photo/img59.webp' },
+    { type: 'image', src: 'photo/img60.webp' },
+    { type: 'image', src: 'photo/img61.webp' },
+    { type: 'image', src: 'photo/img62.webp' },
+    { type: 'image', src: 'photo/img63.webp' },
+    { type: 'video', src: 'photo/video2.mp4' },
+    { type: 'image', src: 'photo/img64.webp' },
+    { type: 'image', src: 'photo/img65.webp' },
+    { type: 'image', src: 'photo/img66.webp' },
+    { type: 'image', src: 'photo/img67.webp' },
+    { type: 'image', src: 'photo/img68.webp' },
+
+  ];
+
+  let index = 0;
+
+  // --- contrôle horizontal GLOBAL (plus dans showNextMedia)
+  function enableHorizontalControl() {
+    const cont = document.getElementById("avatar-container");
+    if (!cont) return;
+
+    let x = window.innerWidth / 2;
+    const speed = 6;
+    const keys = { q: false, d: false };
+
+    cont.style.left = x + "px";
+    cont.style.transform = "translateX(-50%)";
+
+    function down(e){ const k = e.key.toLowerCase(); if (k in keys) keys[k] = true; }
+    function up(e){ const k = e.key.toLowerCase(); if (k in keys) keys[k] = false; }
+    document.addEventListener("keydown", down);
+    document.addEventListener("keyup", up);
+
+    function step() {
+      if (keys.q) x -= speed;
+      if (keys.d) x += speed;
+      const left = Math.max(50, Math.min(window.innerWidth - 50, x));
+      cont.style.left = left + "px";
+      requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  // route + voitures
+  function startCarsSection() {
+  gameActive = true; // 🔥 Le mini-jeu est actif
+  if (window.autoTimer) { clearTimeout(window.autoTimer); window.autoTimer = null; }
+  const solDecor = document.getElementById("sol-decor");
+  if (solDecor) { solDecor.innerHTML = ""; solDecor.style.display = "none"; }
+
+    container.innerHTML = "";
+    document.body.style.backgroundImage = 'url("route.png")';
+
+    const avatarEl  = document.getElementById("avatar");
+    const avatarCont = document.getElementById("avatar-container");
+    avatarEl.src = "avatar2.png";
+    avatarCont.style.display = "block";
+    avatarCont.style.left = "50%";
+    avatarCont.style.top = "auto";
+    avatarCont.style.bottom = "40px";
+    avatarCont.style.transform = "translateX(-50%)";
+    avatarEl.style.width = "100px";
+
+    titreQuestion.style.opacity = 0;
+    reponseOui.style.opacity = 0;
+    reponseNon.style.opacity = 0;
+
+    enableHorizontalControl();
+   // Pause musique Pedro + sauvegarde persistante
+// Si on revient d’un restart, `window.wasMusicPlaying` / `window.savedMusicTime` existent déjà
+if (typeof window.wasMusicPlaying === 'boolean') {
+  wasMusicPlaying = window.wasMusicPlaying;
+} else {
+  wasMusicPlaying = !pedro.paused;
+}
+if (typeof window.savedMusicTime === 'number') {
+  savedMusicTime = window.savedMusicTime;
+} else {
+  savedMusicTime = pedro.currentTime;
+}
+
+// Sauvegarde localStorage (pour le prochain restart éventuel)
+localStorage.setItem('pedroTime', String(savedMusicTime));
+localStorage.setItem('pedroWasPlaying', String(wasMusicPlaying));
+
+pedro.pause();
+
+
+
+    // Démarre la musique du mini-jeu
+    musiqueMiniJeu.currentTime = 0;
+    musiqueMiniJeu.play().catch(() => {});
+    // Démarre le son du cœur
+  coeur.currentTime = 0;
+  coeur.play().catch(() => {});
+
+    startProgressBar(48000, resumeAfterCars);
+    startTraffic();
+    // Bulles à 10s, 25s et 40s
+setTimeout(() => {
+  const b10 = document.getElementById('bulle10');
+  b10.style.opacity = 1;
+  setTimeout(() => { b10.style.opacity = 0; }, 3000);
+}, 10000);
+
+setTimeout(() => {
+  const b25 = document.getElementById('bulle25');
+  b25.style.opacity = 1;
+  setTimeout(() => { b25.style.opacity = 0; }, 3000);
+}, 25000);
+
+setTimeout(() => {
+  const b40 = document.getElementById('bulle40');
+  b40.style.opacity = 1;
+  setTimeout(() => { b40.style.opacity = 0; }, 3000);
+}, 40000);
+  }
+
+  function showNextMedia() {
+    container.innerHTML = "";
+    const media = medias[index];
+    if (!media) return;
+
+    if (media.type === "image") {
+      const img = document.createElement("img");
+      img.src = media.src;
+      container.appendChild(img);
+
+      setTimeout(() => {
+        // Cas spécial : on stoppe à l'image 35 et on lance la route
+        if (media.src === "photo/img35.webp") {
+        setTimeout(() => { // ⏳ Attente 1 seconde
+        startCarsSection();
+        }, 1000);
+        return;
+        }
+        nextStep();
+      }, 850);
+
+    } else if (media.type === "video") {
+      const video = document.createElement("video");
+      video.src = media.src;
+      video.autoplay = true; video.muted = true; video.playsInline = true; video.controls = false;
+
+      let done = false;
+      const timeoutFallback = setTimeout(() => safeNext(), 5000);
+      function safeNext() {
+        if (!done) { done = true; clearTimeout(timeoutFallback); nextStep(); }
+      }
+      video.addEventListener("ended", safeNext);
+      video.addEventListener("error", safeNext);
+      container.appendChild(video);
+    }
+  }
+
+  function nextStep() {
+    index++;
+    if (index < medias.length) {
+      showNextMedia();
+    } else {
+      const fondu = document.getElementById("fondu-noir");
+      setTimeout(() => {
+        fondu.style.opacity = 1;
+        setTimeout(() => { window.location.href = "../jeu3/jeu3.html"; }, 3000);
+      }, 1000);
+    }
+  }
+
+  function startSequence() {
+    document.body.style.display = "flex";
+    pedro.play().catch(() => {});
+    showNextMedia();
+  }
+
+  // décor tulipes
+  const solDecor = document.getElementById('sol-decor');
+  const tulipe1 = 'tulipe1.png';
+  const tulipe2 = 'tulipe2.png';
+  function remplirSolDecor() {
+    const largeurFenetre = window.innerWidth;
+    const largeurTulipe = 70;
+    const nbTulipes = Math.ceil(largeurFenetre / largeurTulipe);
+    for (let i = 0; i < nbTulipes; i++) {
+      const img = document.createElement('img');
+      img.src = ((i + 1) % 3 === 0) ? tulipe2 : tulipe1;
+      img.style.marginLeft = "-20px"; // chevauchement vers la gauche
+      solDecor.appendChild(img);
+    }
+  }
+
+  function startProgressBar(durationMs, onComplete) {
+    const oldBar = document.getElementById("progress-bar-container");
+    const oldTitle = document.getElementById("progress-bar-title");
+    if (oldBar) oldBar.remove();
+    if (oldTitle) oldTitle.remove();
+
+    const title = document.createElement("div");
+    title.id = "progress-bar-title";
+    title.textContent = "Trajet vers le Airbnb";
+    document.body.appendChild(title);
+
+    const containerBar = document.createElement("div");
+    containerBar.id = "progress-bar-container";
+
+    const fill = document.createElement("div");
+    fill.id = "progress-bar-fill";
+    containerBar.appendChild(fill);
+
+    document.body.appendChild(containerBar);
+
+    const startTime = Date.now();
+    let done = false;
+
+    function update() {
+      const elapsed = Date.now() - startTime;
+      let percent = (elapsed / durationMs) * 100;
+      if (percent >= 100) {
+        percent = 100;
+        fill.style.width = percent + "%";
+        if (!done) {
+          done = true;
+          if (typeof onComplete === 'function') onComplete();
+        }
+        return;
+      }
+      fill.style.width = percent + "%";
+      requestAnimationFrame(update);
+    }
+    update();
+  }
+
+  function resumeAfterCars() {
+  gameActive = false;           // stop le mini-jeu
+  stopTraffic();                // supprime les voitures
+  // ⚠️ NE PAS remettre la page jaune tout de suite !
+  // (donc pas de: document.body.style.backgroundImage = "";)
+
+  // Supprime barre + titre
+  const bar = document.getElementById("progress-bar-container");
+  const title = document.getElementById("progress-bar-title");
+  if (bar) bar.remove();
+  if (title) title.remove();
+
+  // Cache l'avatar pendant la transition
+  avatarContainer.style.display = "none";
+
+  // Stoppe l'audio du mini-jeu (silence pendant le message)
+  musiqueMiniJeu.pause();
+  musiqueMiniJeu.currentTime = 0;
+  coeur.pause();
+  coeur.currentTime = 0;
+
+  // ⚠️ NE PAS relancer Pedro maintenant — on attend la fin du message
+
+  // Affiche le message FINAL sur l'écran du mini-jeu (fond route toujours présent)
+  let bravo = document.getElementById('bravo');
+  if (!bravo) {
+    bravo = document.createElement('div');
+    bravo.id = 'bravo';
+    bravo.textContent = "Eléa et Victor sont sauvés, ils vont pouvoir rentrer et s'aimer tendrement et continuer leur histoire....";
+    Object.assign(bravo.style, {
+      position: 'fixed',
+      left: '50%',
+      top: '38%', // un peu au-dessus du centre
+      transform: 'translate(-50%, -50%)',
+      fontSize: '32px',
+      fontWeight: '700',
+      color: '#fff',
+      textAlign: 'center',
+      maxWidth: '80%',
+      lineHeight: '1.4',
+      textShadow: '0 4px 16px rgba(0,0,0,0.6)',
+      zIndex: '10001',
+      pointerEvents: 'none',
+      opacity: '0',
+      transition: 'opacity .3s ease'
+    });
+    document.body.appendChild(bravo);
+  }
+  requestAnimationFrame(() => { bravo.style.opacity = '1'; });
+
+  // ⏱️ Durées (ajuste si besoin)
+  const displayMs = 6000; // temps visible
+  const fadeMs = 300;     // fade out
+
+  // ➜ Après le message, on revient à la page jaune, on relance Pedro et on reprend les photos
+  setTimeout(() => {
+    bravo.style.opacity = '0';
+    setTimeout(() => {
+      if (bravo.parentNode) bravo.remove();
+
+      // NOW: retour à la page jaune + décor
+      document.body.style.backgroundImage = "";
+      const solDecor = document.getElementById('sol-decor');
+      if (solDecor) {
+        solDecor.innerHTML = "";
+        solDecor.style.display = "flex";
+        remplirSolDecor();
+      }
+
+      // Reprend la musique principale
+      pedro.currentTime = 35;
+      pedro.play().catch(() => {});
+
+      // Puis on reprend les photos
+      index++;
+      showNextMedia();
+    }, fadeMs);
+  }, displayMs);
+}
+
+
+  // --- DOMContentLoaded global (mode normal vs reprise directe)
+  window.addEventListener('DOMContentLoaded', () => {
+  remplirSolDecor();
+
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("skipPhotos") === "true") {
+  document.body.style.display = "flex";
+
+  // Restaure le temps ET l’info "est-ce que Pedro jouait ?"
+  const savedTime = localStorage.getItem('pedroTime');
+  if (savedTime) pedro.currentTime = parseFloat(savedTime) || 0;
+
+  // ⚠️ on pose déjà ces variables globales pour les réutiliser plus tard
+  window.wasMusicPlaying = (localStorage.getItem('pedroWasPlaying') === 'true');
+  window.savedMusicTime  = (savedTime ? parseFloat(savedTime) || 0 : pedro.currentTime);
+
+  index = medias.findIndex(m => m.src === "photo/img35.webp");
+  if (index === -1) index = 0;
+  startCarsSection();
+}
+ else {
+    wow.play().then(() => wow.onended = startSequence).catch(() => startSequence());
+  }
+});
+
+  </script>
+</body>
+</html>
