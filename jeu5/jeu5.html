@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>La fin du périple</title>
+  <style>
+    :root{
+      --bubble-max-width: min(90vw, 900px);
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: #000;
+      color: #fff;
+    }
+
+    /* Image un peu plus bas */
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding-top: 250px;
+      overflow: hidden;
+    }
+
+    .stage {
+      position: relative;
+      width: min(70vw, 600px);
+    }
+
+    .stage img {
+      width: 100%;
+      height: auto;
+      display: block;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    .bubble {
+      position: fixed;
+      top: 110px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: var(--bubble-max-width);
+      max-width: var(--bubble-max-width);
+      background: #111;
+      color: #fff;
+      padding: 14px 18px;
+      border-radius: 18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.15);
+      line-height: 1.45;
+      font-size: clamp(14px, 2.2vw, 22px);
+      text-align: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .35s ease;
+      z-index: 10;
+    }
+
+    .bubble.show { opacity: 1; }
+
+    .bubble::after{
+      content: "";
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: -10px;
+      border: 10px solid transparent;
+      border-top-color: #111;
+      filter: drop-shadow(0 -2px 2px rgba(0,0,0,.3));
+    }
+    .special-text {
+  position: absolute;
+  top: -40px; /* ajuste pour placer le texte juste au-dessus de Victor */
+  left: 50%;
+  transform: translateX(-50%) scale(0);
+  font-size: clamp(50px, 10vw, 120px); /* texte bien plus gros */
+  font-weight: bold;
+  color: yellow;
+  animation: growText 1.2s ease-out forwards;
+  z-index: 20;
+}
+
+@keyframes growText {
+  0%   { transform: translateX(-50%) scale(0); opacity: 0; }
+  50%  { transform: translateX(-50%) scale(1.2); opacity: 1; }
+  100% { transform: translateX(-50%) scale(1); opacity: 1; }
+}
+
+/* Assure que l'image passe devant les coeurs */
+.stage img{
+  position: relative;
+  z-index: 2;
+}
+
+/* Calque des coeurs, sous l'image */
+.hearts{
+  position: absolute;
+  inset: 0;
+  z-index: 1;              /* < img (2) => derrière */
+  pointer-events: none;
+  overflow: visible;
+}
+
+/* Un coeur (texte "❤") animé */
+.heart{
+  position: absolute;
+  bottom: -10px;           /* naît légèrement hors cadre */
+  left: 50%;
+  transform: translateX(-50%) scale(0.6);
+  font-size: clamp(18px, 3.2vw, 42px);
+  line-height: 1;
+  color: #ff4d88;          /* rose/rouge */
+  opacity: 0.9;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,.35));
+  will-change: transform, opacity;
+}
+
+/* Départs en éventail à gauche/droite */
+@keyframes floatLeft {
+  0%   { transform: translate(-50%, 0) scale(0.6); opacity: .95; }
+  60%  { opacity: 1; }
+  100% { transform: translate(-140%, -120%) rotate(-20deg) scale(1.1); opacity: 0; }
+}
+@keyframes floatRight {
+  0%   { transform: translate(-50%, 0) scale(0.6); opacity: .95; }
+  60%  { opacity: 1; }
+  100% { transform: translate(40%, -120%) rotate(20deg) scale(1.1); opacity: 0; }
+}
+
+  </style>
+</head>
+<body>
+  <!-- Bulle -->
+  <div id="bubble" class="bubble" aria-live="polite"></div>
+
+  <!-- Scène avec Victor -->
+  <div class="stage">
+    <div id="hearts" class="hearts"></div> <!-- cœurs derrière -->
+    <img id="victor" src="victor.webp" alt="Victor" />
+  </div>
+
+  <!-- Audio -->
+  <audio id="speech-audio" src="animal.mp3" preload="auto"></audio>
+  <audio id="coffre-audio" src="coffre.mp3" preload="auto"></audio>
+  <audio id="coffre1-audio" src="coffre1.mp3" preload="auto"></audio>
+
+
+
+  <script>
+  const TALK_FPS_MS  = 120;  // vitesse d’alternance des images
+  const VOLUME       = 0.5;  // volume audio (0.0 - 1.0)
+
+  const FRAMES = ["victor.webp", "victor1.png"];
+
+  // Chaque bulle = { text: "...", duration: en millisecondes, bg: optionnel }
+  const BUBBLES = [
+    { 
+      text: "Bon voilà, en faisant tout ça j'ai replongé dans nos moments et je me suis encore plus rendu compte à quel point je tiens à toi", 
+      duration: 6000 
+    },
+    { 
+      text: "Effectivement ça m'a pris beaucoup de temps mais j'espère que tu te rendra compte à quel point je veux bien faire et combien tu es importante pour moi", 
+      duration: 7000 
+    },
+    { 
+      text: "Voilà une liste non exhaustive de ce que cela représente, je doute que tu y comprenne quelque chose mais j'espère que ça me pardonnera, au moins un peu, du temps que j'ai pu prendre pour construire tout ça mon coeur.", 
+      duration: 12000,
+      bg: "code.png" // arrière-plan uniquement pour cette bulle
+    },
+    { 
+    text: "En ce moment nous sommes, ou plutôt, tu es en train de me faire une liste des choses pour lesquelles tu m'as séduis. J'ai souri en voyant ce message. Peut-être t'en rappelleras-tu.", 
+    duration: 8000 
+  },
+  { 
+    text: "Rassures toi. Nous sommes sur la fin. Tu te demandes sûrement toujours que peut bien contenir ce foutu livre", 
+    duration: 6000 
+  },
+  { 
+    text: "Je sais que j'ai tendance à faire des choses étranges, j'espère que tu m'aime un peu pour ça. D'un côté, c'est en cela que réside la surprise non?", 
+    duration: 7000 
+  },
+  { 
+    text: "Le code du livre est", 
+    duration: 4000
+  },
+  { 
+    text: "C'est déjà la fin, c'est fou comme c'est passé si vite quand même", 
+    duration: 3000
+  },
+  { 
+    text: "Enfin... Le code du livre est...", 
+    duration: 100
+  },
+  { 
+    text: "578", 
+    duration: 7000
+  },
+  { 
+    text: "J'espère qu'il te plaira.", 
+    duration: 3000
+  },
+  { 
+    text: "Je t'aime plus qu'hier et moins que demain", 
+    duration: 4000 
+  }
+  ];
+
+// Préchargement des images d'animation
+FRAMES.slice(1).forEach(src => { const i = new Image(); i.src = src; });
+
+const img    = document.getElementById('victor');
+const bubble = document.getElementById('bubble');
+const audio  = document.getElementById('speech-audio');      // animal.mp3
+const coffreAudio  = document.getElementById('coffre-audio');  // coffre.mp3
+const coffre1Audio = document.getElementById('coffre1-audio'); // coffre1.mp3
+const body   = document.body;
+
+let talkTimer = null;
+let frameIdx = 0;
+
+let heartsTimer = null;
+
+function createHeart(direction = "left"){
+  const heartsLayer = document.getElementById('hearts');
+  if (!heartsLayer) return;
+
+  const el = document.createElement('span');
+  el.className = 'heart';
+  el.textContent = '❤';
+
+  // Décalage horizontal aléatoire
+  const jitterX = (Math.random() * 80 - 40);
+  el.style.left = `calc(50% + ${jitterX}px)`;
+
+  // Taille / durée aléatoires
+  const scale = 0.8 + Math.random() * 0.8;
+  const duration = 2600 + Math.random() * 1400;
+  el.style.fontSize = `calc(26px * ${scale})`;
+
+  // Animation gauche ou droite
+  el.style.animation = `${direction === "left" ? 'floatLeft' : 'floatRight'} ${duration}ms ease-out forwards`;
+
+  heartsLayer.appendChild(el);
+
+  el.addEventListener('animationend', () => {
+    el.remove();
+  });
+}
+
+function startHeartsLoop(){
+  if (heartsTimer) return;
+  let flip = 0;
+  heartsTimer = setInterval(() => {
+    createHeart(flip % 2 === 0 ? "left" : "right");
+    if (Math.random() < 0.4) {
+      setTimeout(() => createHeart(Math.random() < 0.5 ? "left" : "right"), 120);
+    }
+    flip++;
+  }, 380);
+}
+
+
+function startTalking() {
+  stopTalking();
+  frameIdx = 0;
+  talkTimer = setInterval(() => {
+    frameIdx = (frameIdx + 1) % FRAMES.length;
+    img.src = FRAMES[frameIdx];
+  }, TALK_FPS_MS);
+}
+
+function stopTalking() {
+  if (talkTimer) {
+    clearInterval(talkTimer);
+    talkTimer = null;
+  }
+  img.src = FRAMES[0];
+}
+
+function showBubbleAndTalk({ text, duration, bg }, onComplete) {
+  // Reset état bulle standard
+  bubble.textContent = text;
+  bubble.classList.add('show');
+
+  // Arrière-plan éventuel
+  if (bg) {
+    body.style.backgroundImage = `url('${bg}')`;
+    body.style.backgroundSize = "cover";
+    body.style.backgroundPosition = "center";
+  }
+
+  // Par défaut, ne rien jouer/faire. On décide par cas.
+  // (évite d'avoir animal.mp3 ou l'animation qui tournent pour "578")
+  stopTalking();                 // bouche fermée + stop interval
+  try { audio.pause(); } catch(e){}
+  audio.currentTime = 0;
+
+  if (text === "Enfin... Le code du livre est...") {
+    // --- CAS "Enfin..." : Victor parle + coffre.mp3 ; animal.mp3 inutile ici
+    startTalking();
+    try { coffreAudio.currentTime = 0; coffreAudio.play(); } catch (e) {}
+
+    const onEnd = () => {
+      bubble.classList.remove('show');
+      if (bg) body.style.backgroundImage = "";
+      stopTalking();
+      try { coffreAudio.pause(); } catch (e) {}
+      coffreAudio.currentTime = 0;
+      if (typeof onComplete === "function") onComplete();
+    };
+    coffreAudio.addEventListener('ended', onEnd, { once: true });
+
+  } else if (text === "578") {
+    // --- CAS "578" : PAS d'anim image, PAS d'animal.mp3, juste le texte jaune + coffre1.mp3
+    // cacher la bulle standard (on n’affiche que le gros texte)
+    bubble.classList.remove('show');
+
+    // texte jaune animé
+    const specialText = document.createElement('div');
+    specialText.textContent = text;
+    specialText.className = 'special-text';
+
+    const stage = document.querySelector('.stage');
+    stage.appendChild(specialText);
+
+    // Son coffre1 uniquement
+    try { coffre1Audio.currentTime = 0; coffre1Audio.play(); } catch (e) {}
+
+    setTimeout(() => {
+      specialText.remove();
+      setTimeout(() => {
+        stopTalking(); // au cas où
+        try { coffre1Audio.pause(); } catch (e) {}
+        coffre1Audio.currentTime = 0;
+        if (bg) body.style.backgroundImage = "";
+        if (typeof onComplete === "function") onComplete();
+      }, 350);
+    }, duration);
+
+  } else {
+    // --- CAS NORMAL : Victor parle + animal.mp3
+    startTalking();
+    audio.volume = VOLUME;
+    audio.currentTime = 0;
+    audio.play().catch(err => console.log("animal.mp3 play error:", err));
+
+    setTimeout(() => {
+      bubble.classList.remove('show');
+      if (bg) body.style.backgroundImage = "";
+
+      setTimeout(() => {
+        stopTalking();
+        audio.pause();
+        audio.currentTime = 0;
+        if (typeof onComplete === "function") onComplete();
+      }, 350);
+    }, duration);
+  }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  let i = 0;
+  function nextBubble() {
+    if (i < BUBBLES.length) {
+      showBubbleAndTalk(BUBBLES[i], () => {
+        i++;
+        setTimeout(nextBubble, 800); // délai entre bulles
+      });
+    } else {
+      // toutes les bulles sont passées → on lance les cœurs en boucle
+      startHeartsLoop();
+    }
+  }
+  setTimeout(nextBubble, 600);
+});
+
+
+</script>
+
+
+</body>
+</html>
