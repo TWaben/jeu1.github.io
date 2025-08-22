@@ -178,7 +178,7 @@ window.location.href = "part/part3.html";
 
   function startTraffic() {
     stopTraffic();
-    trafficTimer = setInterval(spawnCar, 900);
+    trafficTimer = setInterval(spawnCar, 2000);
   }
   function stopTraffic() {
     if (trafficTimer) { clearInterval(trafficTimer); trafficTimer = null; }
